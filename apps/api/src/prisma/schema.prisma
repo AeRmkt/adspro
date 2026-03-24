@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  supabaseId         String              @unique
+  email              String              @unique
+  name               String?
+  plan               String              @default("trial")
+  trialEndsAt        DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  adAccounts         AdAccount[]
+  reports            Report[]
+  facebookConnection FacebookConnection?
+}
+
+model FacebookConnection {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fbUserId       String
+  fbUserName     String
+  fbUserEmail    String?
+  accessToken    String
+  tokenExpiresAt DateTime
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model AdAccount {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metaAccountId    String
+  metaAccessToken  String
+  accountName      String
+  currency         String    @default("BRL")
+  timezone         String    @default("America/Sao_Paulo")
+  isActive         Boolean   @default(true)
+  source           String    @default("manual")
+  connectedAt      DateTime  @default(now())
+  lastSyncAt       DateTime?
+
+  @@unique([userId, metaAccountId])
+}
+
+model CachedInsights {
+  id          String   @id @default(uuid())
+  adAccountId String
+  level       String
+  entityId    String
+  dateFrom    String
+  dateTo      String
+  data        Json
+  cachedAt    DateTime @default(now())
+
+  @@unique([adAccountId, level, entityId, dateFrom, dateTo])
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adAccountId String
+  name        String
+  dateFrom    String
+  dateTo      String
+  type        String
+  fileUrl     String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+}
