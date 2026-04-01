@@ -10,18 +10,15 @@ COPY apps/api/package*.json ./apps/api/
 COPY packages/types/package*.json ./packages/types/
 COPY packages/utils/package*.json ./packages/utils/
 
-# Install all dependencies
+# Install all dependencies (including devDependencies for tsx)
 RUN npm install
 
 # Copy source code
 COPY . .
 
-# Generate Prisma client and build
+# Generate Prisma client
 RUN npm run db:generate --workspace=apps/api
-RUN npm run build --workspace=packages/types
-RUN npm run build --workspace=packages/utils
-RUN npm run build --workspace=apps/api
 
 EXPOSE 8080
 
-CMD sh -c "npm run db:migrate --workspace=apps/api && node apps/api/dist/server.js"
+CMD sh -c "npm run db:migrate --workspace=apps/api && npx tsx apps/api/src/server.ts"
