@@ -30,6 +30,7 @@ model FacebookConnection {
   fbUserEmail    String?
   accessToken    String
   tokenExpiresAt DateTime
+  tokenInvalid   Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
@@ -43,6 +44,7 @@ model AdAccount {
   accountName      String
   currency         String    @default("BRL")
   timezone         String    @default("America/Sao_Paulo")
+  accountStatus    Int?
   isActive         Boolean   @default(true)
   source           String    @default("manual")
   connectedAt      DateTime  @default(now())
@@ -62,6 +64,18 @@ model CachedInsights {
   cachedAt    DateTime @default(now())
 
   @@unique([adAccountId, level, entityId, dateFrom, dateTo])
+}
+
+model TokenRenewalFailure {
+  id         String   @id @default(uuid())
+  userId     String
+  fbUserName String
+  error      String
+  attempts   Int      @default(3)
+  failedAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([failedAt])
 }
 
 model Report {

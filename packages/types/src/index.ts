@@ -194,6 +194,53 @@ export interface GenerateReportResponse {
   reportId: string
 }
 
+// ─── Ad Account (com status Meta) ─────────────────────────────────────────────
+// account_status: 1=ACTIVE 2=DISABLED 3=UNSETTLED 7=PENDING_RISK_REVIEW
+//                 8=PENDING_SETTLEMENT 9=IN_GRACE_PERIOD 100=PENDING_CLOSURE
+//                 101=CLOSED 201=ANY_CLOSED 202=IN_COOLDOWN_TIME
+export interface MetaAdAccount {
+  id: string
+  metaAccountId: string
+  accountName: string
+  accountStatus: number | null
+  currency: string
+  timezone: string
+  isActive: boolean
+  source: string
+  connectedAt: string
+  lastSyncAt: string | null
+}
+
+export interface MetaAdAccountsResponse {
+  data: MetaAdAccount[]
+}
+
+// ─── Meta OAuth ───────────────────────────────────────────────────────────────
+export interface FacebookConnection {
+  id: string
+  userId: string
+  fbUserId: string
+  fbUserName: string
+  fbUserEmail: string | null
+  tokenExpiresAt: string
+  tokenInvalid: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MetaOAuthUrlResponse {
+  url: string
+}
+
+export interface MetaConnectionStatus {
+  connected: boolean
+  connection: FacebookConnection | null
+}
+
+export interface MetaDisconnectResponse {
+  success: boolean
+}
+
 // ─── Meta API ─────────────────────────────────────────────────────────────────
 export interface MetaApiAction {
   action_type: string

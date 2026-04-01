@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { DashboardFilters } from '../components/DashboardFilters'
 import { MetricsGrid } from '../components/MetricsGrid'
 import { SpendChart } from '../components/SpendChart'
 import { FunnelChart } from '../components/FunnelChart'
 import { TrialBanner } from '../components/TrialBanner'
 import { ConnectMetaModal } from '../components/ConnectMetaModal'
+import { AdAccountsList } from '../components/AdAccountsList'
 import { CampaignSelector } from '../components/CampaignSelector'
 import { Button } from '../components/ui/Button'
 import { useAdAccounts } from '../hooks/useAdAccounts'
@@ -13,6 +15,7 @@ import { useCampaigns } from '../hooks/useCampaigns'
 import { useDashboardStore } from '../store/dashboardStore'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/auth'
+import { getMetaStatus } from '../services/api'
 import type { MetricInsights } from '@adspro/types'
 
 function aggregateCampaignMetrics(insights: MetricInsights[]): MetricInsights {
@@ -78,6 +81,14 @@ export default function Index() {
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null)
 
+  const { data: metaStatus } = useQuery({
+    queryKey: ['meta-status'],
+    queryFn: getMetaStatus,
+    enabled: !!user,
+    staleTime: 60_000,
+  })
+  const isMetaConnected = metaStatus?.connected && !metaStatus?.connection?.tokenInvalid
+
   // Agrega métricas das campanhas selecionadas
   const campaignData = useMemo<MetricInsights | null | undefined>(() => {
     if (selectedCampaignIds.length === 0) return undefined // usa métricas da conta
@@ -142,6 +153,9 @@ export default function Index() {
             </Button>
           </div>
         </div>
+
+        {/* Contas de Anúncio via OAuth */}
+        <AdAccountsList visible={!!isMetaConnected} />
 
         {/* Métricas */}
         {!accountsLoading && accounts?.length === 0 ? (

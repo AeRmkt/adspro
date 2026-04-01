@@ -11,6 +11,8 @@ import { adSetsRoutes } from './routes/adsets.js'
 import { adsRoutes } from './routes/ads.js'
 import { insightsRoutes } from './routes/insights.js'
 import { reportsRoutes } from './routes/reports.js'
+import { metaRoutes } from './routes/meta.js'
+import { startTokenRenewalJob } from './jobs/tokenRenewal.js'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -47,6 +49,7 @@ await app.register(adSetsRoutes, { prefix: '/api/adsets' })
 await app.register(adsRoutes, { prefix: '/api/ads' })
 await app.register(insightsRoutes, { prefix: '/api/insights' })
 await app.register(reportsRoutes, { prefix: '/api/reports' })
+await app.register(metaRoutes, { prefix: '/api/meta' })
 
 // Start
 const port = Number(process.env.PORT) || 3001
@@ -55,6 +58,7 @@ const host = '0.0.0.0'
 try {
   await app.listen({ port, host })
   app.log.info(`AdsPro API rodando em http://localhost:${port}`)
+  startTokenRenewalJob(app.prisma, app.log)
 } catch (err) {
   app.log.error(err)
   process.exit(1)

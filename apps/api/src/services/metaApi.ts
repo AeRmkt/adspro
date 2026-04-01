@@ -15,6 +15,23 @@ import { requestQueue } from './queue.js'
 const META_API_BASE = 'https://graph.facebook.com/v19.0'
 const RATE_LIMIT_CODES = [17, 80004, 4, 80000, 80001, 80002, 80003]
 
+export interface MetaRawAdAccount {
+  id: string             // "act_XXXXXXXX"
+  name: string
+  account_status: number // 1=ACTIVE 2=DISABLED 3=UNSETTLED 7=PENDING_RISK_REVIEW 101=CLOSED
+  currency: string
+  timezone_name: string
+  spend_cap?: string
+  amount_spent?: string
+}
+
+export class MetaTokenInvalidError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'MetaTokenInvalidError'
+  }
+}
+
 interface MetaApiPage<T> {
   data: T[]
   paging?: {
@@ -57,6 +74,10 @@ export class MetaApiService {
         const code = json.error.code ?? 0
         const isRateLimit = RATE_LIMIT_CODES.includes(code)
         this.logger?.warn({ endpoint, code, duration }, `Meta API erro: ${json.error.message}`)
+
+        if (code === 190) {
+          throw new MetaTokenInvalidError(json.error.message ?? 'Token inválido ou expirado')
+        }
 
         if (isRateLimit && retries > 0) {
           const delay = Math.pow(2, 4 - retries) * 1000 // exponential backoff
@@ -330,6 +351,14 @@ export class MetaApiService {
     }
 
     return this.parseInsights(data.data[0])
+  }
+
+  async getAdAccounts(accessToken: string): Promise<MetaRawAdAccount[]> {
+    return this.requestAllPages<MetaRawAdAccount>(
+      'me/adaccounts',
+      { fields: 'id,name,account_status,currency,timezone_name,spend_cap,amount_spent', limit: '100' },
+      accessToken
+    )
   }
 
   async validateToken(accessToken: string, adAccountId: string): Promise<{ valid: boolean; accountName: string }> {

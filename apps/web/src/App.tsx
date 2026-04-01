@@ -13,6 +13,7 @@ const Settings = lazy(() => import('./pages/Settings'))
 const Login = lazy(() => import('./pages/Login'))
 const Cadastro = lazy(() => import('./pages/Cadastro'))
 const NotFound = lazy(() => import('./pages/NotFound'))
+const MetaCallback = lazy(() => import('./pages/MetaCallback'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -27,6 +28,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/auth/meta/callback" element={<MetaCallback />} />
 
         <Route
           path="/"

@@ -11,6 +11,10 @@ import type {
   ConnectMetaRequest,
   ConnectMetaResponse,
   GenerateReportRequest,
+  MetaOAuthUrlResponse,
+  MetaConnectionStatus,
+  MetaDisconnectResponse,
+  MetaAdAccount,
 } from '@adspro/types'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -80,6 +84,23 @@ export async function deleteAccount(id: string): Promise<void> {
 
 export async function invalidateCache(accountId: string): Promise<void> {
   await request(`/api/accounts/cache/invalidate/${accountId}`, { method: 'POST' })
+}
+
+export async function getMetaOAuthUrl(): Promise<MetaOAuthUrlResponse> {
+  return request<MetaOAuthUrlResponse>('/api/auth/meta/url')
+}
+
+export async function getMetaStatus(): Promise<MetaConnectionStatus> {
+  return request<MetaConnectionStatus>('/api/auth/meta/status')
+}
+
+export async function disconnectMeta(): Promise<MetaDisconnectResponse> {
+  return request<MetaDisconnectResponse>('/api/auth/meta', { method: 'DELETE' })
+}
+
+export async function getMetaAdAccounts(): Promise<MetaAdAccount[]> {
+  const res = await request<{ data: MetaAdAccount[] }>('/api/meta/ad-accounts')
+  return res.data
 }
 
 // ─── Campanhas ───────────────────────────────────────────────────────────────
