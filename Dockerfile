@@ -1,6 +1,9 @@
-FROM node:22-alpine
+FROM node:22-slim
 
 WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
@@ -19,5 +22,4 @@ RUN npm run db:generate
 
 EXPOSE 8080
 
-# Run migrations and start server with tsx
-CMD npm run db:migrate --workspace=apps/api && cd apps/api && npx tsx src/server.ts
+CMD sh -c "npm run db:migrate --workspace=apps/api && cd apps/api && npx tsx src/server.ts"
