@@ -21,5 +21,8 @@
   },
   "dependencies": {
     "pg": "^8.20.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

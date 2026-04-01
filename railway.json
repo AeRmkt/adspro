@@ -6,7 +6,6 @@
   },
   "deploy": {
     "startCommand": "cd apps/api && npm run db:migrate && node dist/server.js",
-    "healthcheckPath": "/health",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
   }
