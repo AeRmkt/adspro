@@ -2,7 +2,6 @@ FROM node:22-slim
 
 WORKDIR /app
 
-# Install OpenSSL for Prisma
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
@@ -17,9 +16,12 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN npm run db:generate
+# Generate Prisma client and build
+RUN npm run db:generate --workspace=apps/api
+RUN npm run build --workspace=packages/types
+RUN npm run build --workspace=packages/utils
+RUN npm run build --workspace=apps/api
 
 EXPOSE 8080
 
-CMD sh -c "npm run db:migrate --workspace=apps/api && cd apps/api && npx tsx src/server.ts"
+CMD sh -c "npm run db:migrate --workspace=apps/api && node apps/api/dist/server.js"
