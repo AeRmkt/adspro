@@ -14,6 +14,8 @@ const Login = lazy(() => import('./pages/Login'))
 const Cadastro = lazy(() => import('./pages/Cadastro'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const MetaCallback = lazy(() => import('./pages/MetaCallback'))
+const Instagram = lazy(() => import('./pages/Instagram'))
+const BusinessManagers = lazy(() => import('./pages/BusinessManagers'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -43,6 +45,8 @@ export default function App() {
           <Route path="conjuntos" element={<AdSets />} />
           <Route path="anuncios" element={<Ads />} />
           <Route path="relatorios" element={<Reports />} />
+          <Route path="instagram" element={<Instagram />} />
+          <Route path="gerenciadores" element={<BusinessManagers />} />
           <Route path="configuracoes" element={<Settings />} />
         </Route>
 

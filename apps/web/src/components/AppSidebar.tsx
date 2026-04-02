@@ -4,6 +4,7 @@ import {
   Zap, LayoutDashboard, Megaphone, Layers, Image, FileText,
   Settings, ChevronDown, ChevronRight, MessageCircle, LogOut,
   ExternalLink, TrendingUp, Database, Palette, Clock, Link2,
+  Instagram, Building2,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useDashboardStore } from '../store/dashboardStore'
@@ -26,7 +27,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: 'Meta Ads', href: '/', icon: <LayoutDashboard className="h-4 w-4" /> },
       { label: 'Google Ads', icon: <TrendingUp className="h-4 w-4" />, disabled: true },
       { label: 'Compilado', icon: <Database className="h-4 w-4" />, disabled: true },
-      { label: 'Instagram', href: '/campanhas', icon: <Image className="h-4 w-4" />, badge: 'NOVO' },
+      { label: 'Instagram', href: '/instagram', icon: <Instagram className="h-4 w-4" />, badge: 'NOVO' },
     ],
   },
   {
@@ -43,6 +44,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: 'Conjuntos', href: '/conjuntos', icon: <Layers className="h-4 w-4" /> },
       { label: 'Anúncios', href: '/anuncios', icon: <Image className="h-4 w-4" /> },
       { label: 'Relatórios', href: '/relatorios', icon: <FileText className="h-4 w-4" /> },
+      { label: 'Gerenciadores', href: '/gerenciadores', icon: <Building2 className="h-4 w-4" /> },
       { label: 'Rastreamento de Leads', icon: <Link2 className="h-4 w-4" />, disabled: true },
     ],
   },

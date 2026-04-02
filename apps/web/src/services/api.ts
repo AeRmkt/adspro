@@ -194,3 +194,88 @@ export async function getReports(): Promise<Report[]> {
 export async function getReportDownload(id: string): Promise<{ downloadUrl: string }> {
   return request<{ downloadUrl: string }>(`/api/reports/${id}/download`)
 }
+
+export async function getReport(id: string): Promise<Report> {
+  return request<Report>(`/api/reports/${id}`)
+}
+
+export async function deleteReport(id: string): Promise<void> {
+  await request(`/api/reports/${id}`, { method: 'DELETE' })
+}
+
+// ─── Business Managers ────────────────────────────────────────────────────────
+
+export interface BusinessManager {
+  id: string
+  bmId: string
+  bmName: string
+  syncedAt: string | null
+  createdAt: string
+}
+
+export async function getBusinessManagers(): Promise<BusinessManager[]> {
+  return request<BusinessManager[]>('/api/business-managers')
+}
+
+export async function syncBusinessManagers(): Promise<{ synced: number; businessManagers: BusinessManager[] }> {
+  return request('/api/business-managers/sync', { method: 'POST' })
+}
+
+export async function syncBMAccounts(bmId: string): Promise<{ synced: number }> {
+  return request(`/api/business-managers/${bmId}/sync-accounts`, { method: 'POST' })
+}
+
+export async function deleteBusinessManager(bmId: string): Promise<void> {
+  await request(`/api/business-managers/${bmId}`, { method: 'DELETE' })
+}
+
+// ─── Instagram ────────────────────────────────────────────────────────────────
+
+export interface InstagramAccount {
+  id: string
+  igAccountId: string
+  username: string
+  name: string | null
+  profilePicUrl: string | null
+  followersCount: number | null
+  mediaCount: number | null
+  linkedPageId: string
+  linkedPageName: string | null
+  lastSyncAt: string | null
+}
+
+export interface InstagramInsights {
+  impressions: number
+  reach: number
+  profileViews: number
+  websiteClicks: number
+  followerGrowth: number
+  daily: Array<{
+    date: string
+    impressions: number
+    reach: number
+    profileViews: number
+    websiteClicks: number
+  }>
+}
+
+export async function getInstagramAccounts(): Promise<InstagramAccount[]> {
+  return request<InstagramAccount[]>('/api/instagram/accounts')
+}
+
+export async function syncInstagramAccounts(): Promise<{ synced: number; accounts: InstagramAccount[] }> {
+  return request('/api/instagram/accounts/sync', { method: 'POST' })
+}
+
+export async function getInstagramInsights(
+  igAccountId: string,
+  from: string,
+  to: string
+): Promise<{ account: InstagramAccount; insights: InstagramInsights }> {
+  const params = new URLSearchParams({ igAccountId, from, to })
+  return request(`/api/instagram/insights?${params}`)
+}
+
+export async function refreshInstagramAccount(igAccountId: string): Promise<InstagramAccount> {
+  return request(`/api/instagram/accounts/${igAccountId}/refresh`, { method: 'POST' })
+}
