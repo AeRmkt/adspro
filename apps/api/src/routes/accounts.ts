@@ -12,6 +12,7 @@ export async function accountsRoutes(app: FastifyInstance): Promise<void> {
         currency: true,
         timezone: true,
         isActive: true,
+        isPrincipal: true,
         connectedAt: true,
         lastSyncAt: true,
       },
@@ -32,6 +33,21 @@ export async function accountsRoutes(app: FastifyInstance): Promise<void> {
       await app.prisma.adAccount.delete({ where: { id } })
       invalidateMemoryCache(id)
       await app.prisma.cachedInsights.deleteMany({ where: { adAccountId: id } })
+
+      return reply.send({ success: true })
+    }
+  )
+
+  app.patch<{ Params: { id: string } }>(
+    '/:id/principal',
+    { preHandler: [app.authenticate] },
+    async (request, reply) => {
+      const { id } = request.params
+      const account = await app.prisma.adAccount.findFirst({ where: { id, userId: request.userId } })
+      if (!account) return reply.status(404).send({ error: 'Conta não encontrada' })
+
+      await app.prisma.adAccount.updateMany({ where: { userId: request.userId }, data: { isPrincipal: false } })
+      await app.prisma.adAccount.update({ where: { id }, data: { isPrincipal: true } })
 
       return reply.send({ success: true })
     }

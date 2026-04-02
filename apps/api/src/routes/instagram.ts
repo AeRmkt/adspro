@@ -99,6 +99,36 @@ export async function instagramRoutes(app: FastifyInstance) {
     })
   })
 
+  // DELETE /api/instagram/accounts/:igAccountId — remove conta Instagram
+  app.delete('/accounts/:igAccountId', { preHandler: app.authenticate }, async (request, reply) => {
+    const { igAccountId } = request.params as { igAccountId: string }
+
+    const account = await app.prisma.instagramAccount.findFirst({
+      where: { userId: request.userId, igAccountId },
+    })
+
+    if (!account) return reply.status(404).send({ error: 'Conta Instagram não encontrada' })
+
+    await app.prisma.instagramAccount.delete({ where: { id: account.id } })
+    return reply.send({ success: true })
+  })
+
+  // PATCH /api/instagram/accounts/:igAccountId/principal — define conta principal
+  app.patch('/accounts/:igAccountId/principal', { preHandler: app.authenticate }, async (request, reply) => {
+    const { igAccountId } = request.params as { igAccountId: string }
+
+    const account = await app.prisma.instagramAccount.findFirst({
+      where: { userId: request.userId, igAccountId },
+    })
+
+    if (!account) return reply.status(404).send({ error: 'Conta Instagram não encontrada' })
+
+    await app.prisma.instagramAccount.updateMany({ where: { userId: request.userId }, data: { isPrincipal: false } })
+    await app.prisma.instagramAccount.update({ where: { id: account.id }, data: { isPrincipal: true } })
+
+    return reply.send({ success: true })
+  })
+
   // POST /api/instagram/accounts/:igAccountId/refresh — atualiza métricas da conta
   app.post('/accounts/:igAccountId/refresh', { preHandler: app.authenticate }, async (request, reply) => {
     const { igAccountId } = request.params as { igAccountId: string }

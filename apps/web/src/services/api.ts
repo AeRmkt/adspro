@@ -82,6 +82,10 @@ export async function deleteAccount(id: string): Promise<void> {
   await request(`/api/accounts/${id}`, { method: 'DELETE' })
 }
 
+export async function setPrincipalAccount(id: string): Promise<void> {
+  await request(`/api/accounts/${id}/principal`, { method: 'PATCH' })
+}
+
 export async function invalidateCache(accountId: string): Promise<void> {
   await request(`/api/accounts/cache/invalidate/${accountId}`, { method: 'POST' })
 }
@@ -241,6 +245,7 @@ export interface InstagramAccount {
   mediaCount: number | null
   linkedPageId: string
   linkedPageName: string | null
+  isPrincipal: boolean
   lastSyncAt: string | null
 }
 
@@ -278,4 +283,12 @@ export async function getInstagramInsights(
 
 export async function refreshInstagramAccount(igAccountId: string): Promise<InstagramAccount> {
   return request(`/api/instagram/accounts/${igAccountId}/refresh`, { method: 'POST' })
+}
+
+export async function setPrincipalInstagram(igAccountId: string): Promise<void> {
+  await request(`/api/instagram/accounts/${igAccountId}/principal`, { method: 'PATCH' })
+}
+
+export async function deleteInstagramAccount(igAccountId: string): Promise<void> {
+  await request(`/api/instagram/accounts/${igAccountId}`, { method: 'DELETE' })
 }

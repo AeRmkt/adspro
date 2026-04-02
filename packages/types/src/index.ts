@@ -18,6 +18,7 @@ export interface AdAccount {
   currency: string
   timezone: string
   isActive: boolean
+  isPrincipal: boolean
   connectedAt: string
   lastSyncAt: string | null
 }

@@ -49,6 +49,7 @@ model AdAccount {
   timezone         String    @default("America/Sao_Paulo")
   accountStatus    Int?
   isActive         Boolean   @default(true)
+  isPrincipal      Boolean   @default(false)
   source           String    @default("manual")
   connectedAt      DateTime  @default(now())
   lastSyncAt       DateTime?
@@ -121,6 +122,7 @@ model InstagramAccount {
   mediaCount       Int?
   linkedPageId     String
   linkedPageName   String?
+  isPrincipal      Boolean   @default(false)
   lastSyncAt       DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
