@@ -12,6 +12,8 @@ import { adsRoutes } from './routes/ads.js'
 import { insightsRoutes } from './routes/insights.js'
 import { reportsRoutes } from './routes/reports.js'
 import { metaRoutes } from './routes/meta.js'
+import { businessManagersRoutes } from './routes/businessManagers.js'
+import { instagramRoutes } from './routes/instagram.js'
 import { startTokenRenewalJob } from './jobs/tokenRenewal.js'
 
 declare module 'fastify' {
@@ -50,6 +52,8 @@ await app.register(adsRoutes, { prefix: '/api/ads' })
 await app.register(insightsRoutes, { prefix: '/api/insights' })
 await app.register(reportsRoutes, { prefix: '/api/reports' })
 await app.register(metaRoutes, { prefix: '/api/meta' })
+await app.register(businessManagersRoutes, { prefix: '/api/business-managers' })
+await app.register(instagramRoutes, { prefix: '/api/instagram' })
 
 // Start
 const port = Number(process.env.PORT) || 3001

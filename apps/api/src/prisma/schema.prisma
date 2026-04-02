@@ -20,6 +20,8 @@ model User {
   adAccounts         AdAccount[]
   reports            Report[]
   facebookConnection FacebookConnection?
+  businessManagers   BusinessManager[]
+  instagramAccounts  InstagramAccount[]
 }
 
 model FacebookConnection {
@@ -90,5 +92,38 @@ model Report {
   type        String
   fileUrl     String?
   status      String   @default("pending")
+  errorMsg    String?
   createdAt   DateTime @default(now())
+}
+
+model BusinessManager {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bmId        String
+  bmName      String
+  syncedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, bmId])
+}
+
+model InstagramAccount {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  igAccountId      String
+  username         String
+  name             String?
+  profilePicUrl    String?
+  followersCount   Int?
+  mediaCount       Int?
+  linkedPageId     String
+  linkedPageName   String?
+  lastSyncAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, igAccountId])
 }

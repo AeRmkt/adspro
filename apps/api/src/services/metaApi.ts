@@ -373,6 +373,178 @@ export class MetaApiService {
       return { valid: false, accountName: '' }
     }
   }
+
+  // ─── Business Manager ────────────────────────────────────────────────────────
+
+  async getBusinessManagers(accessToken: string): Promise<MetaBusinessManager[]> {
+    return this.requestAllPages<MetaBusinessManager>(
+      'me/businesses',
+      { fields: 'id,name,profile_picture_uri,timezone_id,created_time', limit: '50' },
+      accessToken
+    )
+  }
+
+  async getBMAdAccounts(accessToken: string, businessId: string): Promise<MetaRawAdAccount[]> {
+    const owned = await this.requestAllPages<MetaRawAdAccount>(
+      `${businessId}/owned_ad_accounts`,
+      { fields: 'id,name,account_status,currency,timezone_name,spend_cap,amount_spent', limit: '100' },
+      accessToken
+    ).catch(() => [] as MetaRawAdAccount[])
+
+    const client = await this.requestAllPages<MetaRawAdAccount>(
+      `${businessId}/client_ad_accounts`,
+      { fields: 'id,name,account_status,currency,timezone_name,spend_cap,amount_spent', limit: '100' },
+      accessToken
+    ).catch(() => [] as MetaRawAdAccount[])
+
+    const seen = new Set<string>()
+    return [...owned, ...client].filter(a => {
+      if (seen.has(a.id)) return false
+      seen.add(a.id)
+      return true
+    })
+  }
+
+  // ─── Instagram ───────────────────────────────────────────────────────────────
+
+  async getInstagramAccounts(accessToken: string): Promise<MetaInstagramAccount[]> {
+    // Busca páginas do Facebook vinculadas ao usuário
+    const pages = await this.requestAllPages<{ id: string; name: string; instagram_business_account?: { id: string } }>(
+      'me/accounts',
+      { fields: 'id,name,instagram_business_account', limit: '50' },
+      accessToken
+    )
+
+    const igAccounts: MetaInstagramAccount[] = []
+
+    for (const page of pages) {
+      if (!page.instagram_business_account?.id) continue
+      const igId = page.instagram_business_account.id
+
+      try {
+        const igData = await this.request<{
+          id: string
+          username: string
+          name?: string
+          profile_picture_url?: string
+          followers_count?: number
+          media_count?: number
+        }>(
+          igId,
+          { fields: 'id,username,name,profile_picture_url,followers_count,media_count' },
+          accessToken
+        )
+
+        igAccounts.push({
+          id: igData.id,
+          username: igData.username,
+          name: igData.name,
+          profilePictureUrl: igData.profile_picture_url,
+          followersCount: igData.followers_count,
+          mediaCount: igData.media_count,
+          linkedPageId: page.id,
+          linkedPageName: page.name,
+        })
+      } catch {
+        // Ignora conta se não conseguir dados
+      }
+    }
+
+    return igAccounts
+  }
+
+  async getInstagramInsights(
+    accessToken: string,
+    igAccountId: string,
+    dateFrom: string,
+    dateTo: string
+  ): Promise<InstagramInsights> {
+    const since = Math.floor(new Date(dateFrom).getTime() / 1000)
+    const until = Math.floor(new Date(dateTo).getTime() / 1000) + 86400
+
+    // Métricas de período
+    const periodMetrics = await this.request<{ data: Array<{ name: string; values: Array<{ value: number; end_time: string }> }> }>(
+      `${igAccountId}/insights`,
+      {
+        metric: 'impressions,reach,profile_views,website_clicks,follower_count',
+        period: 'day',
+        since: String(since),
+        until: String(until),
+      },
+      accessToken
+    ).catch(() => ({ data: [] }))
+
+    // Agrega valores
+    const agg: Record<string, number> = {}
+    for (const metric of periodMetrics.data) {
+      agg[metric.name] = metric.values.reduce((sum, v) => sum + (v.value || 0), 0)
+    }
+
+    // Série diária
+    const daily: InstagramDailyInsight[] = []
+    if (periodMetrics.data.length > 0) {
+      const impressionsData = periodMetrics.data.find(m => m.name === 'impressions')
+      const reachData = periodMetrics.data.find(m => m.name === 'reach')
+
+      const dates = impressionsData?.values ?? reachData?.values ?? []
+      for (const point of dates) {
+        daily.push({
+          date: point.end_time.slice(0, 10),
+          impressions: impressionsData?.values.find(v => v.end_time === point.end_time)?.value ?? 0,
+          reach: reachData?.values.find(v => v.end_time === point.end_time)?.value ?? 0,
+          profileViews: periodMetrics.data.find(m => m.name === 'profile_views')?.values.find(v => v.end_time === point.end_time)?.value ?? 0,
+          websiteClicks: periodMetrics.data.find(m => m.name === 'website_clicks')?.values.find(v => v.end_time === point.end_time)?.value ?? 0,
+        })
+      }
+    }
+
+    return {
+      impressions: agg['impressions'] ?? 0,
+      reach: agg['reach'] ?? 0,
+      profileViews: agg['profile_views'] ?? 0,
+      websiteClicks: agg['website_clicks'] ?? 0,
+      followerGrowth: agg['follower_count'] ?? 0,
+      daily,
+    }
+  }
 }
 
 export const metaApiService = new MetaApiService()
+
+// ─── Tipos adicionais ─────────────────────────────────────────────────────────
+
+export interface MetaBusinessManager {
+  id: string
+  name: string
+  profile_picture_uri?: string
+  timezone_id?: number
+  created_time?: string
+}
+
+export interface MetaInstagramAccount {
+  id: string
+  username: string
+  name?: string
+  profilePictureUrl?: string
+  followersCount?: number
+  mediaCount?: number
+  linkedPageId: string
+  linkedPageName?: string
+}
+
+export interface InstagramDailyInsight {
+  date: string
+  impressions: number
+  reach: number
+  profileViews: number
+  websiteClicks: number
+}
+
+export interface InstagramInsights {
+  impressions: number
+  reach: number
+  profileViews: number
+  websiteClicks: number
+  followerGrowth: number
+  daily: InstagramDailyInsight[]
+}
