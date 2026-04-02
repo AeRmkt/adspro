@@ -11,11 +11,12 @@ export const corsPlugin = fastifyPlugin(async (app: FastifyInstance) => {
 
   await app.register(cors, {
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true)
-      } else {
-        callback(new Error('Origem não permitida pelo CORS'), false)
+      if (!origin) return callback(null, true)
+      // Allow any Vercel deployment for this project
+      if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+        return callback(null, true)
       }
+      callback(new Error('Origem não permitida pelo CORS'), false)
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
