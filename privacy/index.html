@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — Adspro</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    background: #0a0a0a;
+    color: #e8e4dc;
+    min-height: 100vh;
+    padding: 0;
+  }
+  .header {
+    background: #0a0a0a;
+    border-bottom: 1px solid #222;
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Arial Black', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: #fff;
+  }
+  .logo span { color: #e85d2f; }
+  .badge {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    color: #666;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .hero {
+    background: linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+    padding: 64px 48px 48px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .hero-label {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #e85d2f;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1.15;
+    color: #fff;
+    max-width: 600px;
+    margin-bottom: 20px;
+  }
+  .hero-meta {
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    color: #555;
+    display: flex;
+    gap: 24px;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: #e85d2f; display: inline-block; }
+  .container { max-width: 760px; margin: 0 auto; padding: 56px 48px 80px; }
+  .toc {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 56px;
+  }
+  .toc-title {
+    font-family: 'Arial', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 16px;
+  }
+  .toc a {
+    display: block;
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    color: #888;
+    text-decoration: none;
+    padding: 5px 0;
+    border-bottom: 1px solid #1a1a1a;
+    transition: color 0.2s;
+  }
+  .toc a:last-child { border-bottom: none; }
+  .toc a:hover { color: #e85d2f; }
+  .toc a .num {
+    color: #333;
+    margin-right: 10px;
+    font-size: 11px;
+  }
+  section { margin-bottom: 52px; }
+  .section-num {
+    font-family: 'Arial', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #e85d2f;
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: 24px;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+  p {
+    font-size: 15px;
+    line-height: 1.85;
+    color: #999;
+    margin-bottom: 16px;
+  }
+  ul {
+    margin: 16px 0 16px 0;
+    list-style: none;
+    padding: 0;
+  }
+  ul li {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    color: #888;
+    padding: 8px 0 8px 20px;
+    border-bottom: 1px solid #161616;
+    position: relative;
+    line-height: 1.6;
+  }
+  ul li:last-child { border-bottom: none; }
+  ul li::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #e85d2f;
+    position: absolute;
+    left: 4px;
+    top: 14px;
+  }
+  .highlight-box {
+    background: #111;
+    border-left: 3px solid #e85d2f;
+    padding: 18px 24px;
+    margin: 24px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .highlight-box p {
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    color: #777;
+    margin: 0;
+    line-height: 1.7;
+  }
+  .contact-block {
+    background: #0f0f0f;
+    border: 1px solid #1e1e1e;
+    border-radius: 8px;
+    padding: 28px;
+  }
+  .contact-block p {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+  }
+  .contact-block a { color: #e85d2f; text-decoration: none; }
+  .contact-block a:hover { text-decoration: underline; }
+  .divider { border: none; border-top: 1px solid #1a1a1a; margin: 0 0 52px; }
+  .footer {
+    background: #050505;
+    border-top: 1px solid #111;
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-logo {
+    font-family: 'Arial Black', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: #333;
+  }
+  .footer-logo span { color: #6b2a15; }
+  .footer p {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    color: #333;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Ads<span>pro</span></div>
+  <div class="badge">Política de Privacidade</div>
+</div>
+
+<div class="hero">
+  <div class="hero-label">Documento Legal</div>
+  <h1>Política de Privacidade</h1>
+  <div class="hero-meta">
+    <span><span class="dot"></span> Última atualização: abril de 2025</span>
+    <span><span class="dot"></span> Versão 1.0</span>
+    <span><span class="dot"></span> Português (Brasil)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <div class="toc-title">Índice</div>
+    <a href="#informacoes"><span class="num">01</span> Informações que coletamos</a>
+    <a href="#uso"><span class="num">02</span> Como usamos suas informações</a>
+    <a href="#compartilhamento"><span class="num">03</span> Compartilhamento de dados</a>
+    <a href="#retencao"><span class="num">04</span> Retenção e segurança</a>
+    <a href="#direitos"><span class="num">05</span> Seus direitos</a>
+    <a href="#cookies"><span class="num">06</span> Cookies e rastreamento</a>
+    <a href="#menores"><span class="num">07</span> Menores de idade</a>
+    <a href="#alteracoes"><span class="num">08</span> Alterações nesta política</a>
+    <a href="#contato"><span class="num">09</span> Contato</a>
+  </div>
+
+  <section id="intro">
+    <p>A Adspro ("nós", "nosso" ou "nossa") é uma plataforma de gestão e automação de anúncios digitais. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos as informações dos usuários que acessam nosso aplicativo e serviços.</p>
+    <p>Ao utilizar o Adspro, você concorda com os termos desta política. Caso não concorde, solicitamos que não utilize nossos serviços.</p>
+    <div class="highlight-box">
+      <p>Esta política atende aos requisitos da Meta Platforms, Inc. para aplicativos que utilizam a API do Facebook e Instagram, em conformidade com a Política de Dados da Meta e a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="informacoes">
+    <div class="section-num">01</div>
+    <h2>Informações que coletamos</h2>
+    <p>Coletamos diferentes categorias de informações para fornecer e melhorar nossos serviços:</p>
+
+    <p><strong style="color:#ccc; font-size:13px; font-family:Arial,sans-serif; letter-spacing:1px;">DADOS PESSOAIS BÁSICOS</strong></p>
+    <ul>
+      <li>Nome completo e nome de exibição</li>
+      <li>Endereço de e-mail e número de telefone</li>
+      <li>Foto de perfil (quando fornecida via login social)</li>
+      <li>Informações de faturamento: nome, CPF/CNPJ, endereço de cobrança</li>
+    </ul>
+
+    <p><strong style="color:#ccc; font-size:13px; font-family:Arial,sans-serif; letter-spacing:1px;">DADOS DE CONTAS PUBLICITÁRIAS (VIA META API)</strong></p>
+    <ul>
+      <li>Tokens de acesso à API do Facebook e Instagram</li>
+      <li>IDs de contas de anúncios vinculadas</li>
+      <li>Dados de campanhas, conjuntos de anúncios e criativos</li>
+      <li>Métricas de desempenho: alcance, impressões, cliques, conversões, ROAS</li>
+      <li>Configurações de público-alvo e segmentação</li>
+      <li>Dados de pixels de rastreamento instalados</li>
+    </ul>
+
+    <p><strong style="color:#ccc; font-size:13px; font-family:Arial,sans-serif; letter-spacing:1px;">DADOS FINANCEIROS</strong></p>
+    <ul>
+      <li>Informações de cartão de crédito (processadas por gateway certificado PCI-DSS)</li>
+      <li>Histórico de pagamentos e faturas</li>
+      <li>Saldo e limites de conta publicitária</li>
+    </ul>
+
+    <p><strong style="color:#ccc; font-size:13px; font-family:Arial,sans-serif; letter-spacing:1px;">DADOS DE USO E NAVEGAÇÃO</strong></p>
+    <ul>
+      <li>Endereço IP e dados de geolocalização aproximada</li>
+      <li>Tipo de dispositivo, sistema operacional e navegador</li>
+      <li>Páginas acessadas, funcionalidades utilizadas e tempo de sessão</li>
+      <li>Logs de atividade e registros de erros</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <section id="uso">
+    <div class="section-num">02</div>
+    <h2>Como usamos suas informações</h2>
+    <p>Utilizamos os dados coletados para as seguintes finalidades:</p>
+    <ul>
+      <li>Autenticação, criação e gerenciamento de sua conta no Adspro</li>
+      <li>Conexão e sincronização com suas contas da Meta (Facebook e Instagram)</li>
+      <li>Exibição, criação, edição e otimização de campanhas publicitárias</li>
+      <li>Geração de relatórios de desempenho e insights analíticos</li>
+      <li>Processamento de pagamentos pela assinatura do serviço</li>
+      <li>Envio de notificações sobre sua conta, alertas de campanhas e novidades do produto</li>
+      <li>Suporte ao cliente e resolução de problemas técnicos</li>
+      <li>Melhoria contínua do produto por meio de análise de uso agregado</li>
+      <li>Cumprimento de obrigações legais e regulatórias</li>
+    </ul>
+    <div class="highlight-box">
+      <p>Não utilizamos seus dados de campanhas ou métricas publicitárias para treinar modelos de inteligência artificial próprios ou de terceiros sem seu consentimento explícito.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="compartilhamento">
+    <div class="section-num">03</div>
+    <h2>Compartilhamento de dados</h2>
+    <p>Não vendemos seus dados pessoais. Compartilhamos informações apenas nas seguintes circunstâncias:</p>
+    <ul>
+      <li><strong style="color:#bbb;">Meta Platforms:</strong> dados necessários para autenticar e operar via API do Facebook/Instagram, conforme os Termos de Uso da Meta</li>
+      <li><strong style="color:#bbb;">Processadores de pagamento:</strong> dados de cobrança compartilhados com gateways certificados (ex.: Stripe, Pagar.me) para processamento seguro de transações</li>
+      <li><strong style="color:#bbb;">Serviços de infraestrutura:</strong> provedores de hospedagem, banco de dados e e-mail que atuam como operadores de dados sob contrato de confidencialidade</li>
+      <li><strong style="color:#bbb;">Autoridades competentes:</strong> quando exigido por lei, ordem judicial ou processo regulatório no Brasil</li>
+      <li><strong style="color:#bbb;">Transferência de negócio:</strong> em caso de fusão, aquisição ou venda de ativos, com notificação prévia aos usuários</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <section id="retencao">
+    <div class="section-num">04</div>
+    <h2>Retenção e segurança dos dados</h2>
+    <p>Mantemos seus dados pelo tempo necessário para a prestação dos serviços e pelo período mínimo exigido pela legislação brasileira. Após o encerramento da conta, dados pessoais são excluídos ou anonimizados em até 90 dias, salvo obrigação legal de retenção.</p>
+    <p>Adotamos medidas técnicas e organizacionais para proteger seus dados:</p>
+    <ul>
+      <li>Criptografia em trânsito via TLS 1.2+ e em repouso via AES-256</li>
+      <li>Tokens da Meta API armazenados com criptografia de chave gerenciada</li>
+      <li>Controle de acesso por função (RBAC) com autenticação multifator para administradores</li>
+      <li>Monitoramento contínuo de segurança e gestão de vulnerabilidades</li>
+      <li>Backups regulares com política de recuperação de desastres</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <section id="direitos">
+    <div class="section-num">05</div>
+    <h2>Seus direitos (LGPD)</h2>
+    <p>Nos termos da Lei Geral de Proteção de Dados, você possui os seguintes direitos em relação aos seus dados pessoais:</p>
+    <ul>
+      <li><strong style="color:#bbb;">Acesso:</strong> confirmar a existência de tratamento e obter cópia dos seus dados</li>
+      <li><strong style="color:#bbb;">Correção:</strong> solicitar atualização de dados incompletos, inexatos ou desatualizados</li>
+      <li><strong style="color:#bbb;">Exclusão:</strong> requisitar a eliminação de dados desnecessários ou tratados em desconformidade</li>
+      <li><strong style="color:#bbb;">Portabilidade:</strong> receber seus dados em formato estruturado e interoperável</li>
+      <li><strong style="color:#bbb;">Revogação de consentimento:</strong> retirar consentimento a qualquer momento</li>
+      <li><strong style="color:#bbb;">Oposição:</strong> opor-se ao tratamento realizado sem seu consentimento</li>
+    </ul>
+    <p>Para exercer qualquer um desses direitos, entre em contato pelo e-mail indicado na seção de Contato. Respondemos às solicitações em até 15 dias úteis.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section id="cookies">
+    <div class="section-num">06</div>
+    <h2>Cookies e rastreamento</h2>
+    <p>O Adspro utiliza cookies e tecnologias similares para manter sessões autenticadas, analisar o uso da plataforma e personalizar sua experiência. Os tipos de cookies utilizados incluem:</p>
+    <ul>
+      <li><strong style="color:#bbb;">Cookies essenciais:</strong> necessários para o funcionamento da plataforma, autenticação e segurança de sessão</li>
+      <li><strong style="color:#bbb;">Cookies analíticos:</strong> coletam informações agregadas sobre o uso da plataforma para melhoria do produto</li>
+      <li><strong style="color:#bbb;">Cookies de preferências:</strong> armazenam configurações de interface e preferências do usuário</li>
+    </ul>
+    <p>Você pode gerenciar cookies nas configurações do seu navegador. A desativação de cookies essenciais pode impactar o funcionamento da plataforma.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section id="menores">
+    <div class="section-num">07</div>
+    <h2>Menores de idade</h2>
+    <p>O Adspro é um serviço destinado exclusivamente a pessoas maiores de 18 anos e a empresas. Não coletamos intencionalmente dados pessoais de menores de idade. Caso identifiquemos que dados de um menor foram fornecidos sem consentimento dos responsáveis, esses dados serão excluídos imediatamente.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section id="alteracoes">
+    <div class="section-num">08</div>
+    <h2>Alterações nesta política</h2>
+    <p>Esta política pode ser atualizada periodicamente para refletir mudanças nos nossos serviços, na legislação aplicável ou nas práticas de dados. Alterações relevantes serão comunicadas via e-mail ou notificação na plataforma com pelo menos 15 dias de antecedência.</p>
+    <p>O uso continuado do Adspro após a vigência das alterações constitui aceite da política revisada. Recomendamos revisão periódica deste documento.</p>
+  </section>
+
+  <hr class="divider">
+
+  <section id="contato">
+    <div class="section-num">09</div>
+    <h2>Contato</h2>
+    <p>Para dúvidas, solicitações de direitos ou reporte de incidentes relacionados a dados pessoais:</p>
+    <div class="contact-block">
+      <p style="color:#ccc; font-family:Arial,sans-serif; font-size:15px; font-weight:bold; margin-bottom:16px;">Adspro — Encarregado de Dados (DPO)</p>
+      <p><strong style="color:#777; font-size:12px; font-family:Arial,sans-serif; letter-spacing:1px;">E-MAIL</strong><br><a href="mailto:privacidade@adspro.com.br">privacidade@adspro.com.br</a></p>
+      <p style="margin-top:12px;"><strong style="color:#777; font-size:12px; font-family:Arial,sans-serif; letter-spacing:1px;">SITE</strong><br><a href="https://adspro.com.br">adspro.com.br</a></p>
+    </div>
+  </section>
+
+</div>
+
+<div class="footer">
+  <div class="footer-logo">Ads<span>pro</span></div>
+  <p>© 2025 Adspro. Todos os direitos reservados.</p>
+</div>
+
+</body>
+</html>
