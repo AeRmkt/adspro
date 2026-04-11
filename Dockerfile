@@ -21,4 +21,4 @@ RUN npm run db:generate --workspace=apps/api
 
 EXPOSE 8080
 
-CMD sh -c "npm run db:migrate --workspace=apps/api && cd apps/api && npx tsx src/server.ts"
+CMD sh -c "cd apps/api && npx tsx src/server.ts"
