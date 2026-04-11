@@ -41,7 +41,7 @@ await app.register(rateLimitPlugin)
 await app.register(jwtPlugin)
 
 // Health check (sem autenticação)
-app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
+app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString(), version: 'cors-fix-v2' }))
 
 // Rotas (prefixo /api)
 await app.register(authRoutes, { prefix: '/api/auth' })
