@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Instagram, RefreshCw, Loader2, Users, Eye, Globe, TrendingUp, BarChart3, Star, Trash2, Plus } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -42,13 +42,14 @@ export default function InstagramPage() {
   const { data: accounts, isLoading: loadingAccounts } = useQuery({
     queryKey: ['instagram-accounts'],
     queryFn: getInstagramAccounts,
-    onSuccess: (data) => {
-      if (!selectedAccount) {
-        const principal = data.find(a => a.isPrincipal) ?? data[0] ?? null
-        setSelectedAccount(principal)
-      }
-    },
   })
+
+  useEffect(() => {
+    if (accounts && !selectedAccount) {
+      const principal = accounts.find((a: InstagramAccount) => a.isPrincipal) ?? accounts[0] ?? null
+      setSelectedAccount(principal)
+    }
+  }, [accounts])
 
   const { data: insightsData, isLoading: loadingInsights } = useQuery({
     queryKey: ['instagram-insights', selectedAccount?.igAccountId, dateRange.from, dateRange.to],

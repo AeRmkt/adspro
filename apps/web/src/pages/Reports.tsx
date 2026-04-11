@@ -39,8 +39,8 @@ export default function Reports() {
   const { data: reports, isLoading } = useQuery({
     queryKey: ['reports'],
     queryFn: getReports,
-    refetchInterval: (data) => {
-      const hasPending = data?.some(r => r.status === 'pending' || r.status === 'processing')
+    refetchInterval: (query) => {
+      const hasPending = query.state.data?.some(r => r.status === 'pending' || r.status === 'processing')
       return hasPending ? 3000 : false
     },
   })
