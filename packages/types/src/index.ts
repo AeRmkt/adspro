@@ -21,6 +21,25 @@ export interface AdAccount {
   isPrincipal: boolean
   connectedAt: string
   lastSyncAt: string | null
+  // Saldo (opcional — vem da Graph API)
+  balance?: number | null
+  amountSpent?: number | null
+  spendCap?: number | null
+  accountStatus?: number
+}
+
+// Linha de dados demográficos (breakdown age/gender)
+export interface DemographicRow {
+  key: string
+  age: string | null
+  gender: string | null
+  spend: number
+  impressions: number
+  clicks: number
+  reach: number
+  leads: number
+  purchases: number
+  results: number
 }
 
 // ─── Campanha ─────────────────────────────────────────────────────────────────
@@ -30,6 +49,7 @@ export interface Campaign {
   id: string
   name: string
   status: CampaignStatus
+  effectiveStatus?: string
   objective: string
   dailyBudget: number | null
   lifetimeBudget: number | null
@@ -44,6 +64,7 @@ export interface AdSet {
   campaignId: string
   name: string
   status: CampaignStatus
+  effectiveStatus?: string
   dailyBudget: number | null
   lifetimeBudget: number | null
   targeting: TargetingSummary | null
@@ -63,6 +84,7 @@ export interface Ad {
   adsetId: string
   name: string
   status: CampaignStatus
+  effectiveStatus?: string
   creative: AdCreative | null
   insights: MetricInsights | null
 }

@@ -4,9 +4,10 @@ import {
   Zap, LayoutDashboard, Megaphone, Layers, Image, FileText,
   Settings, ChevronDown, ChevronRight, MessageCircle, LogOut,
   ExternalLink, TrendingUp, Database, Palette, Clock, Link2,
-  Instagram, Building2,
+  Instagram, Building2, Sun, Moon, Wallet,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { useTheme } from '../lib/theme'
 import { useDashboardStore } from '../store/dashboardStore'
 import { signOut } from '../services/auth'
 import { Button } from './ui/Button'
@@ -33,9 +34,9 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: 'Ferramentas de IA',
     items: [
-      { label: 'Análise de Copy', icon: <Megaphone className="h-4 w-4" />, disabled: true },
-      { label: 'Otimizador de Criativos', icon: <Palette className="h-4 w-4" />, disabled: true },
-      { label: 'Previsão de Gasto', icon: <Clock className="h-4 w-4" />, disabled: true },
+      { label: 'Análise de Copy', href: '/ia/copy', icon: <Megaphone className="h-4 w-4" />, badge: 'IA' },
+      { label: 'Otimizador de Criativos', href: '/ia/criativos', icon: <Palette className="h-4 w-4" />, badge: 'IA' },
+      { label: 'Previsão de Gasto', href: '/ia/previsao', icon: <Clock className="h-4 w-4" />, badge: 'IA' },
     ],
   },
   {
@@ -44,6 +45,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: 'Conjuntos', href: '/conjuntos', icon: <Layers className="h-4 w-4" /> },
       { label: 'Anúncios', href: '/anuncios', icon: <Image className="h-4 w-4" /> },
       { label: 'Relatórios', href: '/relatorios', icon: <FileText className="h-4 w-4" /> },
+      { label: 'Saldo', href: '/saldo', icon: <Wallet className="h-4 w-4" /> },
       { label: 'Gerenciadores', href: '/gerenciadores', icon: <Building2 className="h-4 w-4" /> },
       { label: 'Rastreamento de Leads', icon: <Link2 className="h-4 w-4" />, disabled: true },
     ],
@@ -52,7 +54,8 @@ const navSections: { title: string; items: NavItem[] }[] = [
 
 export function AppSidebar() {
   const { sidebarCollapsed, toggleSidebar } = useDashboardStore()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['Campanhas', 'Ferramentas'])
+  const { theme, toggle: toggleTheme } = useTheme()
+  const [expandedSections, setExpandedSections] = useState<string[]>(['Campanhas', 'Ferramentas de IA', 'Ferramentas'])
   const navigate = useNavigate()
 
   const toggleSection = (title: string) => {
@@ -186,6 +189,17 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-2 border-t border-border/40 space-y-1">
+        <button
+          onClick={toggleTheme}
+          className={cn(
+            'flex items-center gap-3 px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors w-full',
+            sidebarCollapsed && 'justify-center'
+          )}
+          title={sidebarCollapsed ? 'Alternar tema' : undefined}
+        >
+          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {!sidebarCollapsed && <span className="flex-1 text-left">{theme === 'dark' ? 'Tema claro' : 'Tema escuro'}</span>}
+        </button>
         <a
           href="https://wa.me/5511999999999"
           target="_blank"

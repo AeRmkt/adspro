@@ -1,4 +1,5 @@
 import { getAccessToken, supabase } from './auth'
+import { isDemo, demoResponse } from './demo'
 import type {
   AdAccount,
   Campaign,
@@ -6,6 +7,7 @@ import type {
   Ad,
   MetricInsights,
   DailyInsight,
+  DemographicRow,
   CompareResult,
   Report,
   ConnectMetaRequest,
@@ -31,6 +33,11 @@ class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (isDemo) {
+    await new Promise((r) => setTimeout(r, 120))
+    return demoResponse(path, (options.method as string) || 'GET') as T
+  }
+
   const token = await getAccessToken()
 
   const headers: HeadersInit = {
@@ -179,6 +186,30 @@ export async function compareInsights(
   const params = new URLSearchParams({ accountId, from1, to1, from2, to2 })
   const res = await request<{ data: CompareResult }>(`/api/insights/compare?${params}`)
   return res.data
+}
+
+export type DemographicBreakdown = 'age' | 'gender' | 'age_gender'
+
+export async function getDemographics(
+  accountId: string,
+  from: string,
+  to: string,
+  breakdown: DemographicBreakdown = 'age'
+): Promise<DemographicRow[]> {
+  const params = new URLSearchParams({ accountId, from, to, breakdown })
+  const res = await request<{ data: DemographicRow[] }>(`/api/insights/demographics?${params}`)
+  return res.data
+}
+
+// ─── Escrita: ativar/pausar campanha, conjunto ou anúncio ─────────────────────
+export async function setEntityStatus(
+  id: string,
+  status: 'ACTIVE' | 'PAUSED'
+): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>('/api/entity/status', {
+    method: 'POST',
+    body: JSON.stringify({ id, status }),
+  })
 }
 
 // ─── Relatórios ───────────────────────────────────────────────────────────────

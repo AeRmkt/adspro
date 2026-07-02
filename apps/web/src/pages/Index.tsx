@@ -2,9 +2,13 @@ import { useState, useEffect, useMemo } from 'react'
 import { Plus } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { DashboardFilters } from '../components/DashboardFilters'
+import { MetricPicker } from '../components/MetricPicker'
 import { MetricsGrid } from '../components/MetricsGrid'
 import { SpendChart } from '../components/SpendChart'
 import { FunnelChart } from '../components/FunnelChart'
+import { AdsManager } from '../components/AdsManager'
+import { DemographicsCard } from '../components/DemographicsCard'
+import { BestAdsCard } from '../components/BestAdsCard'
 import { TrialBanner } from '../components/TrialBanner'
 import { ConnectMetaModal } from '../components/ConnectMetaModal'
 import { AdAccountsList } from '../components/AdAccountsList'
@@ -76,7 +80,7 @@ function aggregateCampaignMetrics(insights: MetricInsights[]): MetricInsights {
 export default function Index() {
   const { data: accounts, isLoading: accountsLoading } = useAdAccounts()
   const { data: campaigns, isLoading: campaignsLoading } = useCampaigns()
-  const { selectedAccountId, selectedCampaignIds, setSelectedAccount, metricsOrder } = useDashboardStore()
+  const { selectedAccountId, selectedCampaignIds, setSelectedAccount } = useDashboardStore()
   const { user } = useAuth()
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null)
@@ -134,7 +138,7 @@ export default function Index() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <h1 className="text-2xl font-bold gradient-text">Dashboard</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Visão geral das suas campanhas Meta Ads
             </p>
@@ -142,6 +146,7 @@ export default function Index() {
           <div className="flex items-center gap-2 flex-wrap">
             <DashboardFilters />
             <CampaignSelector />
+            <MetricPicker />
             <Button
               variant="outline"
               size="sm"
@@ -183,15 +188,23 @@ export default function Index() {
             )}
 
             <MetricsGrid
-              metricsOrder={metricsOrder}
               campaignData={campaignData}
               campaignLoading={selectedCount > 0 && campaignsLoading}
             />
+
+            {/* Gerenciador de Anúncios estilo Facebook (campanha → conjunto → anúncio) */}
+            <AdsManager />
 
             {/* Gráficos */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SpendChart />
               <FunnelChart />
+            </div>
+
+            {/* Demografia + Melhores Anúncios */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <DemographicsCard />
+              <BestAdsCard />
             </div>
           </>
         )}

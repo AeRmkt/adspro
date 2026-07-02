@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { ChevronDown, ChevronRight, Search, ArrowUpDown } from 'lucide-react'
 import { useCampaigns } from '../hooks/useCampaigns'
 import { useAdSets } from '../hooks/useAdSets'
@@ -24,6 +24,30 @@ function statusLabel(status: string): string {
   }
   return map[status] || status
 }
+
+const OBJECTIVE_LABELS: Record<string, string> = {
+  OUTCOME_SALES: 'Vendas',
+  OUTCOME_LEADS: 'Leads',
+  OUTCOME_ENGAGEMENT: 'Engajamento',
+  OUTCOME_TRAFFIC: 'Tráfego',
+  OUTCOME_AWARENESS: 'Reconhecimento',
+  OUTCOME_APP_PROMOTION: 'App',
+}
+function objectiveLabel(o?: string | null): string {
+  if (!o) return '—'
+  return OBJECTIVE_LABELS[o] || o.replace(/^OUTCOME_/, '').replace(/_/g, ' ')
+}
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: 'spend', label: 'Gasto' },
+  { key: 'roas', label: 'ROAS' },
+  { key: 'purchases', label: 'Compras' },
+  { key: 'clicks', label: 'Cliques' },
+  { key: 'ctr', label: 'CTR' },
+  { key: 'impressions', label: 'Impressões' },
+  { key: 'reach', label: 'Alcance' },
+  { key: 'name', label: 'Nome' },
+]
 
 function AdSetsRow({ campaignId }: { campaignId: string }) {
   const { data: adsets, isLoading } = useAdSets(campaignId)
@@ -83,13 +107,20 @@ export function CampaignsTable() {
   const { data: campaigns, isLoading } = useCampaigns()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [objectiveFilter, setObjectiveFilter] = useState<string>('all')
   const [sortKey, setSortKey] = useState<SortKey>('spend')
   const [sortAsc, setSortAsc] = useState(false)
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
 
+  const objectives = useMemo(
+    () => Array.from(new Set((campaigns || []).map((c) => c.objective).filter(Boolean))) as string[],
+    [campaigns]
+  )
+
   const filtered = (campaigns || [])
     .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
     .filter((c) => statusFilter === 'all' || c.status === statusFilter)
+    .filter((c) => objectiveFilter === 'all' || c.objective === objectiveFilter)
     .sort((a, b) => {
       let av: number, bv: number
       if (sortKey === 'name') {
@@ -139,8 +170,8 @@ export function CampaignsTable() {
   return (
     <div className="space-y-3">
       {/* Filtros */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
+      <div className="glass-card p-3 flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar campanha..."
@@ -159,6 +190,42 @@ export function CampaignsTable() {
           <option value="PAUSED">Pausados</option>
           <option value="ARCHIVED">Arquivados</option>
         </select>
+        <select
+          value={objectiveFilter}
+          onChange={(e) => setObjectiveFilter(e.target.value)}
+          className="h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="all">Todos os objetivos</option>
+          {objectives.map((o) => (
+            <option key={o} value={o}>{objectiveLabel(o)}</option>
+          ))}
+        </select>
+        <div className="flex items-center gap-1">
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.key} value={o.key}>Ordenar: {o.label}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => setSortAsc((v) => !v)}
+            title={sortAsc ? 'Crescente' : 'Decrescente'}
+            className="h-10 w-10 rounded-md border border-input bg-background flex items-center justify-center hover:bg-accent transition-colors"
+          >
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="ml-auto flex items-center gap-4 text-sm pr-1">
+          <span className="text-muted-foreground">
+            <strong className="text-foreground">{filtered.length}</strong> campanhas
+          </span>
+          <span className="text-muted-foreground">
+            Gasto: <strong className="text-foreground">{fmtBRL(filtered.reduce((s, c) => s + (c.insights?.spend ?? 0), 0))}</strong>
+          </span>
+        </div>
       </div>
 
       {/* Tabela */}
@@ -222,7 +289,12 @@ export function CampaignsTable() {
                           ? <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                       </td>
-                      <td className="px-4 py-3 font-medium max-w-[200px] truncate">{campaign.name}</td>
+                      <td className="px-4 py-3 max-w-[240px]">
+                        <div className="font-medium truncate">{campaign.name}</div>
+                        {campaign.objective && (
+                          <div className="text-xs text-muted-foreground mt-0.5">{objectiveLabel(campaign.objective)}</div>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-center">
                         <Badge variant={statusVariant(campaign.status)}>
                           {statusLabel(campaign.status)}
