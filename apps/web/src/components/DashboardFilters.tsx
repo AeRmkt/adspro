@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CalendarDays, ChevronDown, RefreshCw } from 'lucide-react'
 import { Button } from './ui/Button'
+import { Calendar } from './ui/Calendar'
 import { useDashboardStore } from '../store/dashboardStore'
 import { useAdAccounts } from '../hooks/useAdAccounts'
 import { useQueryClient } from '@tanstack/react-query'
@@ -128,34 +129,22 @@ export function DashboardFilters({ onCompare }: DashboardFiltersProps) {
               Personalizado...
             </button>
             {showCustom && (
-              <div className="px-3 pb-3 pt-1 flex flex-col gap-2">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-muted-foreground">De</label>
-                  <input
-                    type="date"
-                    value={customFrom}
-                    max={customTo}
-                    onChange={(e) => setCustomFrom(e.target.value)}
-                    className="w-full rounded-md border border-border/60 bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-muted-foreground">Até</label>
-                  <input
-                    type="date"
-                    value={customTo}
-                    min={customFrom}
-                    onChange={(e) => setCustomTo(e.target.value)}
-                    className="w-full rounded-md border border-border/60 bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
+              <div className="px-2 pb-3 pt-1 flex flex-col gap-2">
+                <Calendar
+                  from={customFrom}
+                  to={customTo}
+                  onSelect={({ from, to }) => { setCustomFrom(from); setCustomTo(to) }}
+                />
+                <div className="px-1 text-center text-xs text-muted-foreground">
+                  {fmtDate(customFrom)} — {fmtDate(customTo)}
                 </div>
                 <Button
                   size="sm"
-                  className="w-full mt-1"
+                  className="mx-1"
                   disabled={!customFrom || !customTo || customFrom > customTo}
                   onClick={handleApplyCustom}
                 >
-                  Aplicar
+                  Aplicar período
                 </Button>
               </div>
             )}
