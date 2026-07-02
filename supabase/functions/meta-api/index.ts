@@ -75,6 +75,21 @@ async function getUserToken(userId: string | null): Promise<string | null> {
   return await getSharedToken();
 }
 
+// Mapa conta→token (config meta_account_tokens, JSON). Algumas contas só são
+// acessíveis por um token específico (ex.: system user). Cai no fallback se não houver.
+async function getAccountTokens(): Promise<Record<string, string>> {
+  const raw = await getConfig("meta_account_tokens");
+  if (!raw) return {};
+  try { return JSON.parse(raw) as Record<string, string>; } catch { return {}; }
+}
+
+async function tokenForAccount(accountId: string, fallback: string): Promise<string> {
+  const id = accountId.replace(/^act_/, "");
+  if (!id) return fallback;
+  const map = await getAccountTokens();
+  return map[id] || fallback;
+}
+
 // ─── Graph helpers ──────────────────────────────────────────────────────────
 async function graph<T>(endpoint: string, params: Record<string, string>, token: string): Promise<T> {
   const url = new URL(`${META}/${endpoint}`);
@@ -194,28 +209,53 @@ function mapAccount(a: Record<string, unknown>) {
   };
 }
 
+// Adiciona contas fixadas em config (meta_extra_accounts) que devem SEMPRE aparecer,
+// buscando cada uma diretamente. Se o token não tiver acesso, ignora silenciosamente.
+async function appendExtraAccounts(token: string, out: ReturnType<typeof mapAccount>[], seen: Set<string>) {
+  const extras = (await getConfig("meta_extra_accounts")) || "";
+  for (const raw of extras.split(",").map((x) => x.trim().replace(/^act_/, "")).filter(Boolean)) {
+    if (seen.has(raw)) continue;
+    try {
+      const t = await tokenForAccount(raw, token);
+      const a = await graph<Record<string, unknown>>(`act_${raw}`, { fields: ACCOUNT_FIELDS }, t);
+      const acc = mapAccount(a);
+      seen.add(acc.id);
+      out.push(acc);
+    } catch (_e) { /* sem acesso a essa conta → ignora */ }
+  }
+}
+
 // Lista contas: tenta me/adaccounts (token de usuário → traz TODAS); se falhar
 // (token de página), agrega owned_ad_accounts + client_ad_accounts dos businesses configurados.
+// Em ambos os casos, mescla as contas extras fixadas (meta_extra_accounts).
 async function listAccounts(token: string) {
-  try {
-    const raw = await graphAll<Record<string, unknown>>("me/adaccounts", { fields: ACCOUNT_FIELDS, limit: "500" }, token);
-    if (raw.length) return raw.map(mapAccount);
-  } catch (_e) { /* token de página: cai no fallback */ }
-
-  const bizCsv = (await getConfig("meta_business_ids")) || "660046657198021";
   const seen = new Set<string>();
   const out: ReturnType<typeof mapAccount>[] = [];
-  for (const biz of bizCsv.split(",").map((b) => b.trim()).filter(Boolean)) {
-    for (const edge of ["owned_ad_accounts", "client_ad_accounts"]) {
-      try {
-        const raw = await graphAll<Record<string, unknown>>(`${biz}/${edge}`, { fields: ACCOUNT_FIELDS, limit: "500" }, token);
-        for (const a of raw) {
-          const acc = mapAccount(a);
-          if (!seen.has(acc.id)) { seen.add(acc.id); out.push(acc); }
-        }
-      } catch (_e) { /* ignora business sem acesso */ }
+
+  try {
+    const raw = await graphAll<Record<string, unknown>>("me/adaccounts", { fields: ACCOUNT_FIELDS, limit: "500" }, token);
+    for (const a of raw) {
+      const acc = mapAccount(a);
+      if (!seen.has(acc.id)) { seen.add(acc.id); out.push(acc); }
+    }
+  } catch (_e) { /* token de página: cai no fallback abaixo */ }
+
+  if (out.length === 0) {
+    const bizCsv = (await getConfig("meta_business_ids")) || "660046657198021";
+    for (const biz of bizCsv.split(",").map((b) => b.trim()).filter(Boolean)) {
+      for (const edge of ["owned_ad_accounts", "client_ad_accounts"]) {
+        try {
+          const raw = await graphAll<Record<string, unknown>>(`${biz}/${edge}`, { fields: ACCOUNT_FIELDS, limit: "500" }, token);
+          for (const a of raw) {
+            const acc = mapAccount(a);
+            if (!seen.has(acc.id)) { seen.add(acc.id); out.push(acc); }
+          }
+        } catch (_e) { /* ignora business sem acesso */ }
+      }
     }
   }
+
+  await appendExtraAccounts(token, out, seen);
   return out;
 }
 
@@ -329,6 +369,8 @@ Deno.serve(async (req: Request) => {
       if (route.includes("/auth/meta/status")) return json({ connected: false, connection: null });
       return json({ data: [] });
     }
+    // Token específico da conta selecionada (system user etc.), se houver.
+    const acctToken = accountId ? await tokenForAccount(accountId, token) : token;
 
     // ── Status da conexão ──
     if (route.includes("/auth/meta/status")) {
@@ -352,17 +394,20 @@ Deno.serve(async (req: Request) => {
       const bodyText = await req.text();
       let id = q.get("id") || "";
       let status = (q.get("status") || "").toUpperCase();
+      let acct = accountId;
       if (bodyText) {
         try {
           const b = JSON.parse(bodyText);
           id = b.id ?? id;
           status = String(b.status ?? status).toUpperCase();
+          if (b.accountId) acct = String(b.accountId).replace(/^act_/, "");
         } catch { /* ignora */ }
       }
       if (!id || (status !== "ACTIVE" && status !== "PAUSED")) {
         return json({ error: "Parâmetros inválidos (id, status ACTIVE|PAUSED)." }, 400);
       }
-      await graphPost(id, { status }, token);
+      const writeToken = acct ? await tokenForAccount(acct, token) : token;
+      await graphPost(id, { status }, writeToken);
       return json({ success: true, id, status });
     }
 
@@ -376,7 +421,7 @@ Deno.serve(async (req: Request) => {
       const r = await graph<{ data: Record<string, unknown>[] }>(
         `act_${accountId}/insights`,
         { fields: INSIGHT_FIELDS + ",website_ctr", time_range: tr() },
-        token,
+        acctToken,
       );
       return json({ data: parseInsights(r.data?.[0]) });
     }
@@ -388,7 +433,7 @@ Deno.serve(async (req: Request) => {
       const rows = await graphAll<Record<string, unknown>>(
         `act_${accountId}/insights`,
         { fields: "spend,impressions,clicks,reach,actions,action_values", breakdowns, time_range: tr(), limit: "500" },
-        token,
+        acctToken,
       );
       const data = rows.map((d) => {
         const actions = d.actions as Action[] | undefined;
@@ -424,7 +469,7 @@ Deno.serve(async (req: Request) => {
         const r = await graph<{ data: Record<string, unknown>[] }>(
           `act_${accountId}/insights`,
           { fields: INSIGHT_FIELDS, time_range: JSON.stringify({ since: s, until: u }) },
-          token,
+          acctToken,
         );
         return parseInsights(r.data?.[0]);
       };
@@ -436,7 +481,7 @@ Deno.serve(async (req: Request) => {
       const rows = await graphAll<Record<string, unknown>>(
         `act_${accountId}/insights`,
         { fields: "spend,impressions,clicks,reach,actions,action_values,outbound_clicks", time_increment: "1", time_range: tr(), limit: "90" },
-        token,
+        acctToken,
       );
       return json({
         data: rows.map((d) => {
@@ -467,7 +512,7 @@ Deno.serve(async (req: Request) => {
           fields: `id,name,status,effective_status,objective,daily_budget,lifetime_budget,start_time,stop_time,insights.time_range(${tr()}){${INSIGHT_FIELDS}}`,
           limit: "200",
         },
-        token,
+        acctToken,
       );
       return json({
         data: raw.map((c) => {
@@ -495,7 +540,7 @@ Deno.serve(async (req: Request) => {
       const raw = await graphAll<Record<string, unknown>>(
         ep,
         { fields: `id,campaign_id,name,status,effective_status,daily_budget,lifetime_budget,insights.time_range(${tr()}){${INSIGHT_FIELDS}}`, limit: "200" },
-        token,
+        acctToken,
       );
       return json({
         data: raw.map((s) => {
@@ -519,7 +564,7 @@ Deno.serve(async (req: Request) => {
       const raw = await graphAll<Record<string, unknown>>(
         ep,
         { fields: `id,adset_id,name,status,effective_status,creative{thumbnail_url,title,body,call_to_action_type},insights.time_range(${tr()}){${INSIGHT_FIELDS}}`, limit: "200" },
-        token,
+        acctToken,
       );
       return json({
         data: raw.map((a) => {

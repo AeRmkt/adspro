@@ -6,6 +6,7 @@ import { useCampaigns } from '../hooks/useCampaigns'
 import { useAdSets } from '../hooks/useAdSets'
 import { useAds } from '../hooks/useAds'
 import { setEntityStatus } from '../services/api'
+import { useDashboardStore } from '../store/dashboardStore'
 import { toast } from './ui/useToast'
 import { Switch } from './ui/Switch'
 import { Input } from './ui/Input'
@@ -47,9 +48,10 @@ function StatusToggle({ id, status, size = 'md', invalidate }: {
   id: string; status: string; size?: 'sm' | 'md'; invalidate: string[]
 }) {
   const qc = useQueryClient()
+  const { selectedAccountId } = useDashboardStore()
   const [optimistic, setOptimistic] = useState<boolean | null>(null)
   const mut = useMutation({
-    mutationFn: (next: boolean) => setEntityStatus(id, next ? 'ACTIVE' : 'PAUSED'),
+    mutationFn: (next: boolean) => setEntityStatus(id, next ? 'ACTIVE' : 'PAUSED', selectedAccountId ?? undefined),
     onSuccess: (_d, next) => {
       toast({ title: next ? 'Ativado' : 'Pausado', description: next ? 'Voltou a rodar no Meta.' : 'Foi pausado no Meta.' })
       invalidate.forEach((k) => qc.invalidateQueries({ queryKey: [k] }))

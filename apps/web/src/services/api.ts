@@ -204,11 +204,12 @@ export async function getDemographics(
 // ─── Escrita: ativar/pausar campanha, conjunto ou anúncio ─────────────────────
 export async function setEntityStatus(
   id: string,
-  status: 'ACTIVE' | 'PAUSED'
+  status: 'ACTIVE' | 'PAUSED',
+  accountId?: string
 ): Promise<{ success: boolean }> {
   return request<{ success: boolean }>('/api/entity/status', {
     method: 'POST',
-    body: JSON.stringify({ id, status }),
+    body: JSON.stringify({ id, status, accountId }),
   })
 }
 
