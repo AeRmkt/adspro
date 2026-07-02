@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Zap, LayoutDashboard, Megaphone, Layers, Image, FileText,
   Settings, ChevronDown, ChevronRight, MessageCircle, LogOut,
   ExternalLink, TrendingUp, Database, Palette, Clock, Link2,
-  Instagram, Building2, Sun, Moon, Wallet,
+  Instagram, Building2, Sun, Moon, Wallet, X,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useTheme } from '../lib/theme'
@@ -52,11 +52,29 @@ const navSections: { title: string; items: NavItem[] }[] = [
   },
 ]
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  mobileOpen?: boolean
+  onClose?: () => void
+}
+
+export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
   const { sidebarCollapsed, toggleSidebar } = useDashboardStore()
   const { theme, toggle: toggleTheme } = useTheme()
   const [expandedSections, setExpandedSections] = useState<string[]>(['Campanhas', 'Ferramentas de IA', 'Ferramentas'])
+  const [isMobile, setIsMobile] = useState(false)
   const navigate = useNavigate()
+
+  // No mobile a sidebar é um drawer (sempre expandida); o colapso é só no desktop.
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const on = () => setIsMobile(mq.matches)
+    on()
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+
+  const collapsed = isMobile ? false : sidebarCollapsed
+  const closeOnMobile = () => { if (isMobile) onClose?.() }
 
   const toggleSection = (title: string) => {
     setExpandedSections((prev) =>
@@ -72,8 +90,10 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        'flex flex-col h-screen bg-card border-r border-border/40 transition-all duration-300 flex-shrink-0',
-        sidebarCollapsed ? 'w-16' : 'w-64'
+        'fixed inset-y-0 left-0 z-50 flex flex-col h-screen bg-card border-r border-border/40 transition-all duration-300',
+        'lg:static lg:z-auto lg:flex-shrink-0 lg:translate-x-0',
+        collapsed ? 'w-16' : 'w-64',
+        mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
       )}
     >
       {/* Logo */}
@@ -81,17 +101,23 @@ export function AppSidebar() {
         <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-md flex-shrink-0">
           <Zap className="h-4 w-4 text-white" />
         </div>
-        {!sidebarCollapsed && (
+        {!collapsed && (
           <span className="font-bold text-lg tracking-tight">AdsPro</span>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn('ml-auto h-7 w-7', sidebarCollapsed && 'mx-auto ml-0')}
-          onClick={toggleSidebar}
-        >
-          <ChevronRight className={cn('h-4 w-4 transition-transform', !sidebarCollapsed && 'rotate-180')} />
-        </Button>
+        {isMobile ? (
+          <Button variant="ghost" size="icon" className="ml-auto h-7 w-7" onClick={onClose} title="Fechar menu">
+            <X className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn('ml-auto h-7 w-7', collapsed && 'mx-auto ml-0')}
+            onClick={toggleSidebar}
+          >
+            <ChevronRight className={cn('h-4 w-4 transition-transform', !collapsed && 'rotate-180')} />
+          </Button>
+        )}
       </div>
 
       {/* Nav */}
@@ -100,7 +126,7 @@ export function AppSidebar() {
           const isExpanded = expandedSections.includes(section.title)
           return (
             <div key={section.title}>
-              {!sidebarCollapsed && (
+              {!collapsed && (
                 <button
                   onClick={() => toggleSection(section.title)}
                   className="flex items-center justify-between w-full px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
@@ -109,7 +135,7 @@ export function AppSidebar() {
                   <ChevronDown className={cn('h-3 w-3 transition-transform', isExpanded && 'rotate-180')} />
                 </button>
               )}
-              {(isExpanded || sidebarCollapsed) && (
+              {(isExpanded || collapsed) && (
                 <div className="space-y-0.5 mt-1">
                   {section.items.map((item) => {
                     if (item.href) {
@@ -124,13 +150,14 @@ export function AppSidebar() {
                               isActive
                                 ? 'bg-primary/10 text-primary'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent',
-                              sidebarCollapsed && 'justify-center'
+                              collapsed && 'justify-center'
                             )
                           }
-                          title={sidebarCollapsed ? item.label : undefined}
+                          onClick={closeOnMobile}
+                          title={collapsed ? item.label : undefined}
                         >
                           {item.icon}
-                          {!sidebarCollapsed && (
+                          {!collapsed && (
                             <>
                               <span className="flex-1">{item.label}</span>
                               {item.badge && (
@@ -148,12 +175,12 @@ export function AppSidebar() {
                         key={item.label}
                         className={cn(
                           'flex items-center gap-3 px-2 py-2 rounded-md text-sm text-muted-foreground/50 cursor-not-allowed',
-                          sidebarCollapsed && 'justify-center'
+                          collapsed && 'justify-center'
                         )}
-                        title={sidebarCollapsed ? `${item.label} (Em breve)` : undefined}
+                        title={collapsed ? `${item.label} (Em breve)` : undefined}
                       >
                         {item.icon}
-                        {!sidebarCollapsed && (
+                        {!collapsed && (
                           <>
                             <span className="flex-1">{item.label}</span>
                             <span className="text-[10px] text-muted-foreground/50">Em breve</span>
@@ -172,17 +199,18 @@ export function AppSidebar() {
         <div className="pt-2 border-t border-border/40">
           <NavLink
             to="/configuracoes"
+            onClick={closeOnMobile}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 px-2 py-2 rounded-md text-sm transition-colors',
                 isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-accent',
-                sidebarCollapsed && 'justify-center'
+                collapsed && 'justify-center'
               )
             }
-            title={sidebarCollapsed ? 'Configurações' : undefined}
+            title={collapsed ? 'Configurações' : undefined}
           >
             <Settings className="h-4 w-4" />
-            {!sidebarCollapsed && <span>Configurações</span>}
+            {!collapsed && <span>Configurações</span>}
           </NavLink>
         </div>
       </nav>
@@ -193,12 +221,12 @@ export function AppSidebar() {
           onClick={toggleTheme}
           className={cn(
             'flex items-center gap-3 px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors w-full',
-            sidebarCollapsed && 'justify-center'
+            collapsed && 'justify-center'
           )}
-          title={sidebarCollapsed ? 'Alternar tema' : undefined}
+          title={collapsed ? 'Alternar tema' : undefined}
         >
           {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          {!sidebarCollapsed && <span className="flex-1 text-left">{theme === 'dark' ? 'Tema claro' : 'Tema escuro'}</span>}
+          {!collapsed && <span className="flex-1 text-left">{theme === 'dark' ? 'Tema claro' : 'Tema escuro'}</span>}
         </button>
         <a
           href="https://wa.me/5511999999999"
@@ -206,12 +234,12 @@ export function AppSidebar() {
           rel="noopener noreferrer"
           className={cn(
             'flex items-center gap-3 px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors',
-            sidebarCollapsed && 'justify-center'
+            collapsed && 'justify-center'
           )}
-          title={sidebarCollapsed ? 'WhatsApp Suporte' : undefined}
+          title={collapsed ? 'WhatsApp Suporte' : undefined}
         >
           <MessageCircle className="h-4 w-4" />
-          {!sidebarCollapsed && (
+          {!collapsed && (
             <>
               <span className="flex-1">Suporte WhatsApp</span>
               <ExternalLink className="h-3 w-3 opacity-50" />
@@ -222,12 +250,12 @@ export function AppSidebar() {
           onClick={handleLogout}
           className={cn(
             'flex items-center gap-3 px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors w-full',
-            sidebarCollapsed && 'justify-center'
+            collapsed && 'justify-center'
           )}
-          title={sidebarCollapsed ? 'Sair' : undefined}
+          title={collapsed ? 'Sair' : undefined}
         >
           <LogOut className="h-4 w-4" />
-          {!sidebarCollapsed && <span>Sair</span>}
+          {!collapsed && <span>Sair</span>}
         </button>
       </div>
     </aside>

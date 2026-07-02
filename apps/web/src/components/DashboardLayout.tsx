@@ -1,14 +1,47 @@
+import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { Menu, Zap } from 'lucide-react'
 import { AppSidebar } from './AppSidebar'
 import { Toaster } from './ui/Toaster'
 
 export function DashboardLayout() {
+  const [mobileOpen, setMobileOpen] = useState(false)
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <AppSidebar />
-      <main className="flex-1 overflow-y-auto">
-        <Outlet />
-      </main>
+      {/* Backdrop (mobile) */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <AppSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Barra superior (só mobile) */}
+        <header className="flex items-center gap-3 border-b border-border/40 bg-card px-4 py-3 lg:hidden">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            title="Abrir menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
+              <Zap className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-bold tracking-tight">AdsPro</span>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
+      </div>
+
       <Toaster />
     </div>
   )

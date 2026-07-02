@@ -100,7 +100,7 @@ function Row({
     <div
       className={cn(
         'group flex items-center gap-3 py-2.5 pr-3 transition-colors',
-        depth === 0 ? 'pl-3 hover:bg-accent/40' : depth === 1 ? 'pl-9 bg-muted/20 hover:bg-accent/30' : 'pl-16 bg-muted/40 hover:bg-accent/20',
+        depth === 0 ? 'pl-3 hover:bg-accent/40' : depth === 1 ? 'pl-6 md:pl-9 bg-muted/20 hover:bg-accent/30' : 'pl-9 md:pl-16 bg-muted/40 hover:bg-accent/20',
       )}
     >
       {toggle}
@@ -126,6 +126,12 @@ function Row({
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium">{name}</div>
         <div className="mt-1"><StatusPill status={effectiveStatus} /></div>
+        {/* Métricas compactas (só mobile) */}
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] tabular-nums text-muted-foreground md:hidden">
+          <span><b className="text-foreground">{insights ? fmtBRL(insights.spend) : '—'}</b> gasto</span>
+          <span><b className="text-primary">{insights ? fmtNumber(insights.results) : '—'}</b> result.</span>
+          <span>CTR {insights ? fmtPct(insights.ctr) : '—'}</span>
+        </div>
       </div>
 
       <RowMetrics insights={insights} />
@@ -238,7 +244,7 @@ export function AdsManager() {
             {query ? 'Nenhuma campanha corresponde à busca.' : 'Nenhuma campanha nesta conta e período.'}
           </div>
         ) : (
-          <div className="min-w-[600px] divide-y divide-border/40">
+          <div className="min-w-0 md:min-w-[600px] divide-y divide-border/40">
             <AnimatePresence initial={false} mode="popLayout">
               {filtered.map((c, i) => {
                 const isOpen = open.has(c.id)
