@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
-import { Menu, Zap } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { AppSidebar } from './AppSidebar'
 import { Toaster } from './ui/Toaster'
+import { LogoMark } from './ui/Logo'
 
 export function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -30,10 +31,8 @@ export function DashboardLayout() {
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-bold tracking-tight">AdsPro</span>
+            <LogoMark className="h-7 w-7" />
+            <span className="font-semibold tracking-[-0.02em]">Ads Pro</span>
           </div>
         </header>
 

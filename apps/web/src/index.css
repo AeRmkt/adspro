@@ -28,6 +28,10 @@
     --border: 220 16% 88%;
     --input: 220 16% 90%;
     --ring: 221 83% 53%;
+
+    /* Marca: a ponta clara do gradiente do logo. Quase branca some no tema
+       claro, então lá ela vira um índigo suave. Ver ui/Logo.tsx. */
+    --logo-stop-light: #9E9DF2;
   }
 
   /* TEMA ESCURO */
@@ -55,6 +59,9 @@
     --border: 217 19% 20%;
     --input: 217 19% 18%;
     --ring: 221 83% 58%;
+
+    /* No escuro a marca usa o tom original do arquivo de marca. */
+    --logo-stop-light: #F5F5F6;
   }
 }
 

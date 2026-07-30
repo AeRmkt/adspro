@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Zap, Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { signUpWithEmail, signInWithGoogle } from '../services/auth'
+import { LogoMark } from '../components/ui/Logo'
 
 export default function Cadastro() {
   const [name, setName] = useState('')
@@ -38,7 +39,7 @@ export default function Cadastro() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="glass-card p-8 max-w-sm w-full text-center">
           <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Zap className="h-6 w-6 text-success" />
+            <CheckCircle2 className="h-6 w-6 text-success" />
           </div>
           <h2 className="text-xl font-semibold mb-2">Conta criada!</h2>
           <p className="text-sm text-muted-foreground mb-6">
@@ -56,10 +57,8 @@ export default function Cadastro() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-2xl font-bold">AdsPro</span>
+          <LogoMark className="h-10 w-10" />
+          <span className="text-2xl font-semibold tracking-[-0.02em]">Ads Pro</span>
         </div>
 
         <div className="glass-card p-8">

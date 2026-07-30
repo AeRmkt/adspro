@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  Zap, LayoutDashboard, Megaphone, Layers, Image, FileText,
+  LayoutDashboard, Megaphone, Layers, Image, FileText,
   Settings, ChevronDown, ChevronRight, MessageCircle, LogOut,
   ExternalLink, TrendingUp, Database, Palette, Clock, Link2,
   Instagram, Building2, Sun, Moon, Wallet, X,
@@ -11,6 +11,7 @@ import { useTheme } from '../lib/theme'
 import { useDashboardStore } from '../store/dashboardStore'
 import { signOut } from '../services/auth'
 import { Button } from './ui/Button'
+import { LogoMark } from './ui/Logo'
 
 interface NavItem {
   label: string
@@ -97,12 +98,10 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 p-4 border-b border-border/40">
-        <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-md flex-shrink-0">
-          <Zap className="h-4 w-4 text-white" />
-        </div>
+      <div className="flex items-center gap-2.5 p-4 border-b border-border/40">
+        <LogoMark className="h-8 w-8 flex-shrink-0" />
         {!collapsed && (
-          <span className="font-bold text-lg tracking-tight">AdsPro</span>
+          <span className="font-semibold text-lg tracking-[-0.02em]">Ads Pro</span>
         )}
         {isMobile ? (
           <Button variant="ghost" size="icon" className="ml-auto h-7 w-7" onClick={onClose} title="Fechar menu">
