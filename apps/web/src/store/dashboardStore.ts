@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getDatePreset, type DatePresetKey } from '@adspro/utils'
 import { DEFAULT_VISIBLE_METRICS } from '../lib/metrics'
+import { DEFAULT_SECTION_ORDER, normalizeSectionOrder } from '../lib/dashboardSections'
 
 export interface DateRange {
   from: string
@@ -19,6 +20,8 @@ interface DashboardStore {
   metricsOrder: string[]
   visibleMetrics: string[]
   funnelSteps: string[]
+  /** Ordem das seções do dashboard (ids de dashboardSections). */
+  sectionOrder: string[]
   sidebarCollapsed: boolean
 
   setSelectedAccount: (id: string | null) => void
@@ -28,6 +31,8 @@ interface DashboardStore {
   setMetricsOrder: (order: string[]) => void
   setVisibleMetrics: (keys: string[]) => void
   setFunnelSteps: (keys: string[]) => void
+  setSectionOrder: (ids: string[]) => void
+  resetSectionOrder: () => void
   toggleSidebar: () => void
 }
 
@@ -44,6 +49,7 @@ type PersistedState = Pick<
   | 'metricsOrder'
   | 'visibleMetrics'
   | 'funnelSteps'
+  | 'sectionOrder'
   | 'sidebarCollapsed'
 >
 
@@ -54,6 +60,7 @@ const PERSIST_DEFAULTS: PersistedState = {
   metricsOrder: [],
   visibleMetrics: DEFAULT_VISIBLE_METRICS,
   funnelSteps: DEFAULT_FUNNEL_STEPS,
+  sectionOrder: DEFAULT_SECTION_ORDER,
   sidebarCollapsed: false,
 }
 
@@ -67,6 +74,7 @@ export const useDashboardStore = create<DashboardStore>()(
       metricsOrder: [],
       visibleMetrics: DEFAULT_VISIBLE_METRICS,
       funnelSteps: DEFAULT_FUNNEL_STEPS,
+      sectionOrder: DEFAULT_SECTION_ORDER,
       sidebarCollapsed: false,
 
       setSelectedAccount: (id) => set({ selectedAccountId: id, selectedCampaignIds: [] }),
@@ -77,6 +85,8 @@ export const useDashboardStore = create<DashboardStore>()(
       setMetricsOrder: (order) => set({ metricsOrder: order }),
       setVisibleMetrics: (keys) => set({ visibleMetrics: keys }),
       setFunnelSteps: (keys) => set({ funnelSteps: keys.slice(0, 3) }),
+      setSectionOrder: (ids) => set({ sectionOrder: normalizeSectionOrder(ids) }),
+      resetSectionOrder: () => set({ sectionOrder: DEFAULT_SECTION_ORDER }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
     }),
     {
@@ -92,6 +102,7 @@ export const useDashboardStore = create<DashboardStore>()(
         metricsOrder: state.metricsOrder,
         visibleMetrics: state.visibleMetrics,
         funnelSteps: state.funnelSteps,
+        sectionOrder: state.sectionOrder,
         sidebarCollapsed: state.sidebarCollapsed,
       }),
       // Storage da v1 não tinha datePreset: descarta o período salvo e volta ao padrão.
@@ -106,6 +117,7 @@ export const useDashboardStore = create<DashboardStore>()(
         if (state.datePreset && state.datePreset !== 'custom') {
           state.dateRange = getDatePreset(state.datePreset)
         }
+        state.sectionOrder = normalizeSectionOrder(state.sectionOrder)
       },
     }
   )

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, LayoutGrid } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { DashboardFilters } from '../components/DashboardFilters'
 import { MetricPicker } from '../components/MetricPicker'
@@ -11,12 +11,14 @@ import { DemographicsCard } from '../components/DemographicsCard'
 import { BestAdsCard } from '../components/BestAdsCard'
 import { TrialBanner } from '../components/TrialBanner'
 import { ConnectMetaModal } from '../components/ConnectMetaModal'
+import { OrganizeSectionsModal } from '../components/OrganizeSectionsModal'
 import { AdAccountsList } from '../components/AdAccountsList'
 import { CampaignSelector } from '../components/CampaignSelector'
 import { Button } from '../components/ui/Button'
 import { useAdAccounts } from '../hooks/useAdAccounts'
 import { useCampaigns } from '../hooks/useCampaigns'
 import { useDashboardStore } from '../store/dashboardStore'
+import { sectionById } from '../lib/dashboardSections'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/auth'
 import { getMetaStatus } from '../services/api'
@@ -80,9 +82,10 @@ function aggregateCampaignMetrics(insights: MetricInsights[]): MetricInsights {
 export default function Index() {
   const { data: accounts, isLoading: accountsLoading } = useAdAccounts()
   const { data: campaigns, isLoading: campaignsLoading } = useCampaigns()
-  const { selectedAccountId, selectedCampaignIds, setSelectedAccount } = useDashboardStore()
+  const { selectedAccountId, selectedCampaignIds, setSelectedAccount, sectionOrder } = useDashboardStore()
   const { user } = useAuth()
   const [showConnectModal, setShowConnectModal] = useState(false)
+  const [showOrganize, setShowOrganize] = useState(false)
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null)
 
   const { data: metaStatus } = useQuery({
@@ -187,30 +190,47 @@ export default function Index() {
               </div>
             )}
 
-            <MetricsGrid
-              campaignData={campaignData}
-              campaignLoading={selectedCount > 0 && campaignsLoading}
-            />
-
-            {/* Gerenciador de Anúncios estilo Facebook (campanha → conjunto → anúncio) */}
-            <AdsManager />
-
-            {/* Gráficos */}
+            {/* Seções na ordem definida pelo usuário (Organizar seções).
+                'half' adjacentes pareiam sozinhas no grid de 2 colunas. */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SpendChart />
-              <FunnelChart />
+              {sectionOrder.map((id) => {
+                const section = sectionById(id)
+                if (!section) return null
+                const node: Record<string, JSX.Element> = {
+                  metrics: (
+                    <MetricsGrid
+                      campaignData={campaignData}
+                      campaignLoading={selectedCount > 0 && campaignsLoading}
+                    />
+                  ),
+                  adsManager: <AdsManager />,
+                  spend: <SpendChart />,
+                  funnel: <FunnelChart />,
+                  demographics: <DemographicsCard />,
+                  bestAds: <BestAdsCard />,
+                }
+                const el = node[id]
+                if (!el) return null
+                return (
+                  <div key={id} className={section.span === 'full' ? 'lg:col-span-2' : undefined}>
+                    {el}
+                  </div>
+                )
+              })}
             </div>
 
-            {/* Demografia + Melhores Anúncios */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <DemographicsCard />
-              <BestAdsCard />
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowOrganize(true)}>
+                <LayoutGrid className="h-4 w-4" />
+                Organizar seções
+              </Button>
             </div>
           </>
         )}
       </div>
 
       <ConnectMetaModal open={showConnectModal} onClose={() => setShowConnectModal(false)} />
+      <OrganizeSectionsModal open={showOrganize} onClose={() => setShowOrganize(false)} />
     </div>
   )
 }
