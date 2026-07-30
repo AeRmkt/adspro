@@ -23,7 +23,8 @@ interface DashboardFiltersProps {
 }
 
 export function DashboardFilters({ onCompare }: DashboardFiltersProps) {
-  const { selectedAccountId, dateRange, setSelectedAccount, setDateRange } = useDashboardStore()
+  const { selectedAccountId, dateRange, datePreset, setSelectedAccount, setDateRange, setDatePreset } =
+    useDashboardStore()
   const { data: accounts, isLoading } = useAdAccounts()
   const queryClient = useQueryClient()
   const [showDateMenu, setShowDateMenu] = useState(false)
@@ -42,10 +43,12 @@ export function DashboardFilters({ onCompare }: DashboardFiltersProps) {
   }
 
   const handlePreset = (preset: typeof DATE_PRESETS[number]['value']) => {
-    setDateRange(getDatePreset(preset))
+    setDatePreset(preset)
     setShowDateMenu(false)
     setShowCustom(false)
   }
+
+  const presetLabel = DATE_PRESETS.find((p) => p.value === datePreset)?.label
 
   const handleApplyCustom = () => {
     if (!customFrom || !customTo || customFrom > customTo) return
@@ -106,7 +109,10 @@ export function DashboardFilters({ onCompare }: DashboardFiltersProps) {
           onClick={() => { setShowDateMenu(!showDateMenu); setShowCustom(false) }}
         >
           <CalendarDays className="h-3.5 w-3.5 opacity-70" />
-          <span>{fmtDate(dateRange.from)} — {fmtDate(dateRange.to)}</span>
+          <span>
+            {presetLabel && <span className="opacity-70 mr-1.5">{presetLabel}:</span>}
+            {fmtDate(dateRange.from)} — {fmtDate(dateRange.to)}
+          </span>
           <ChevronDown className="h-3.5 w-3.5 opacity-50" />
         </Button>
 
@@ -116,7 +122,9 @@ export function DashboardFilters({ onCompare }: DashboardFiltersProps) {
               <button
                 key={preset.value}
                 onClick={() => handlePreset(preset.value)}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors text-foreground"
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors ${
+                  datePreset === preset.value ? 'text-primary' : 'text-foreground'
+                }`}
               >
                 {preset.label}
               </button>
@@ -124,7 +132,9 @@ export function DashboardFilters({ onCompare }: DashboardFiltersProps) {
             <div className="border-t border-border/40 my-1" />
             <button
               onClick={() => { setCustomFrom(dateRange.from); setCustomTo(dateRange.to); setShowCustom(!showCustom) }}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors text-foreground"
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors ${
+                datePreset === 'custom' ? 'text-primary' : 'text-foreground'
+              }`}
             >
               Personalizado...
             </button>

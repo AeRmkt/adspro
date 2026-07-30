@@ -99,12 +99,37 @@ export function getPreviousPeriod(from: string, to: string): { from: string; to:
   }
 }
 
+export type DatePresetKey =
+  | 'today' | 'yesterday' | 'last7' | 'last14' | 'last30' | 'thisMonth' | 'lastMonth'
+
 /**
- * Presets de período (retorna datas no formato YYYY-MM-DD)
+ * Fuso padrão das contas (o Gerenciador de Anúncios reporta no fuso da conta).
+ * Usar UTC aqui desloca o período em 1 dia e faz os números divergirem do Meta.
  */
-export function getDatePreset(preset: 'today' | 'yesterday' | 'last7' | 'last14' | 'last30' | 'thisMonth' | 'lastMonth'): { from: string; to: string } {
-  const today = new Date()
-  const fmt = (d: Date) => d.toISOString().split('T')[0]
+export const ACCOUNT_TIMEZONE = 'America/Sao_Paulo'
+
+/** "YYYY-MM-DD" no fuso informado (nunca em UTC). */
+export function formatDateInTz(d: Date, timeZone = ACCOUNT_TIMEZONE): string {
+  // en-CA já produz YYYY-MM-DD
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d)
+}
+
+/**
+ * Presets de período (retorna datas no formato YYYY-MM-DD, no fuso da conta).
+ */
+export function getDatePreset(preset: DatePresetKey, timeZone = ACCOUNT_TIMEZONE): { from: string; to: string } {
+  // Descobre que dia é "hoje" no fuso da conta e passa a tratar tudo como data
+  // de calendário ancorada em UTC-meia-noite. A partir daqui a formatação é
+  // sempre UTC — reconverter para o fuso deslocaria o dia de volta.
+  const [y, m, dd] = formatDateInTz(new Date(), timeZone).split('-').map(Number)
+  const fmt = (d: Date) => d.toISOString().slice(0, 10)
+  const today = new Date(Date.UTC(y, m - 1, dd))
+  const shift = (days: number) => new Date(Date.UTC(y, m - 1, dd + days))
 
   switch (preset) {
     case 'today': {
@@ -112,35 +137,22 @@ export function getDatePreset(preset: 'today' | 'yesterday' | 'last7' | 'last14'
       return { from: f, to: f }
     }
     case 'yesterday': {
-      const y = new Date(today)
-      y.setDate(y.getDate() - 1)
-      const f = fmt(y)
+      const f = fmt(shift(-1))
       return { from: f, to: f }
     }
-    case 'last7': {
-      const from = new Date(today)
-      from.setDate(from.getDate() - 6)
-      return { from: fmt(from), to: fmt(today) }
-    }
-    case 'last14': {
-      const from = new Date(today)
-      from.setDate(from.getDate() - 13)
-      return { from: fmt(from), to: fmt(today) }
-    }
-    case 'last30': {
-      const from = new Date(today)
-      from.setDate(from.getDate() - 29)
-      return { from: fmt(from), to: fmt(today) }
-    }
-    case 'thisMonth': {
-      const from = new Date(today.getFullYear(), today.getMonth(), 1)
-      return { from: fmt(from), to: fmt(today) }
-    }
-    case 'lastMonth': {
-      const from = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-      const to = new Date(today.getFullYear(), today.getMonth(), 0)
-      return { from: fmt(from), to: fmt(to) }
-    }
+    case 'last7':
+      return { from: fmt(shift(-6)), to: fmt(today) }
+    case 'last14':
+      return { from: fmt(shift(-13)), to: fmt(today) }
+    case 'last30':
+      return { from: fmt(shift(-29)), to: fmt(today) }
+    case 'thisMonth':
+      return { from: fmt(new Date(Date.UTC(y, m - 1, 1))), to: fmt(today) }
+    case 'lastMonth':
+      return {
+        from: fmt(new Date(Date.UTC(y, m - 2, 1))),
+        to: fmt(new Date(Date.UTC(y, m - 1, 0))),
+      }
   }
 }
 
