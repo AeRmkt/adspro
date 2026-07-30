@@ -17,6 +17,7 @@ import type {
   MetaConnectionStatus,
   MetaDisconnectResponse,
   MetaAdAccount,
+  AccountLastDelivery,
 } from '@adspro/types'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -111,6 +112,25 @@ export async function disconnectMeta(): Promise<MetaDisconnectResponse> {
 
 export async function getMetaAdAccounts(): Promise<MetaAdAccount[]> {
   const res = await request<{ data: MetaAdAccount[] }>('/api/meta/ad-accounts')
+  return res.data
+}
+
+// ─── Última veiculação ───────────────────────────────────────────────────────
+
+/**
+ * Última entrega de cada conta e campanha. Detecta conta/campanha que parou
+ * (saldo zerado, rejeição, pausa esquecida) sem depender do período do filtro.
+ */
+export async function getLastDelivery(
+  accountIds: string[],
+  lookbackDays = 90
+): Promise<AccountLastDelivery[]> {
+  if (accountIds.length === 0) return []
+  const params = new URLSearchParams({
+    accountIds: accountIds.join(','),
+    lookback: String(lookbackDays),
+  })
+  const res = await request<{ data: AccountLastDelivery[] }>(`/api/insights/last-delivery?${params}`)
   return res.data
 }
 

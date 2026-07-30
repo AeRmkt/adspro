@@ -1,5 +1,6 @@
 import { Wallet, TrendingUp, AlertTriangle, CircleDollarSign } from 'lucide-react'
 import { useAdAccounts } from '../hooks/useAdAccounts'
+import { LastDeliveryCard } from '../components/LastDeliveryCard'
 import { MagicCard } from '../components/ui/MagicCard'
 import { NumberTicker } from '../components/ui/NumberTicker'
 import { Skeleton } from '../components/ui/Skeleton'
@@ -106,9 +107,12 @@ export default function Saldo() {
           Nenhuma conta conectada ainda.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {accounts.map((acc) => <AccountCard key={acc.id} acc={acc} />)}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {accounts.map((acc) => <AccountCard key={acc.id} acc={acc} />)}
+          </div>
+          <LastDeliveryCard accounts={accounts} />
+        </>
       )}
     </div>
   )

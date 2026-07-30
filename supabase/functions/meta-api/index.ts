@@ -126,6 +126,33 @@ async function graphAll<T>(endpoint: string, params: Record<string, string>, tok
   return out;
 }
 
+// ─── Datas ───────────────────────────────────────────────────────────────────
+// As contas reportam no fuso delas; usar UTC desloca o dia e faz o número
+// divergir do Gerenciador de Anúncios.
+const ACCOUNT_TZ = Deno.env.get("ADSPRO_ACCOUNT_TZ") ?? "America/Sao_Paulo";
+
+/** "YYYY-MM-DD" de hoje no fuso da conta. */
+function todayInTz(timeZone = ACCOUNT_TZ): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+/** Soma dias a uma data "YYYY-MM-DD" (aritmética de calendário, sem fuso). */
+function shiftDays(date: string, days: number): string {
+  const [y, m, d] = date.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
+/** Dias inteiros entre duas datas "YYYY-MM-DD". */
+function daysBetween(from: string, to: string): number {
+  const ms = Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`);
+  return Math.round(ms / 86_400_000);
+}
+
 // ─── parseInsights (portado de metaApi.ts) ───────────────────────────────────
 type Action = { action_type: string; value: string };
 const num = (v: unknown) => parseFloat(String(v ?? "0")) || 0;
@@ -414,6 +441,72 @@ Deno.serve(async (req: Request) => {
     // ── Contas ──
     if (route.startsWith("/api/accounts") || route.startsWith("/api/meta/ad-accounts")) {
       return json({ data: await listAccounts(token) });
+    }
+
+    // ── Última veiculação ──
+    // Detecta conta/campanha que parou de entregar (saldo zerado, rejeição, pausa
+    // esquecida). Varre o histórico diário e pega o último dia com impressão.
+    if (route.startsWith("/api/insights/last-delivery")) {
+      const lookback = Math.min(Math.max(parseInt(q.get("lookback") || "90", 10) || 90, 7), 180);
+      const until = todayInTz();
+      const since = shiftDays(until, -lookback);
+      const ids = (q.get("accountIds") || accountId)
+        .split(",").map((s) => s.trim().replace(/^act_/, "")).filter(Boolean);
+
+      const results = await Promise.all(ids.map(async (id) => {
+        try {
+          const t = await tokenForAccount(id, token);
+          const rows = await graphAll<Record<string, unknown>>(
+            `act_${id}/insights`,
+            {
+              fields: "campaign_id,campaign_name,impressions,spend",
+              level: "campaign",
+              time_increment: "1",
+              time_range: JSON.stringify({ since, until }),
+              limit: "500",
+            },
+            t,
+          );
+
+          const byCampaign = new Map<string, { id: string; name: string; lastDate: string; spend: number }>();
+          let accountLast = "";
+          for (const r of rows) {
+            if (num(r.impressions) <= 0) continue;
+            const date = String(r.date_start ?? "");
+            if (!date) continue;
+            if (date > accountLast) accountLast = date;
+            const cid = String(r.campaign_id ?? "");
+            const prev = byCampaign.get(cid);
+            const spend = num(r.spend);
+            if (!prev) {
+              byCampaign.set(cid, { id: cid, name: String(r.campaign_name ?? cid), lastDate: date, spend });
+            } else {
+              prev.spend += spend;
+              if (date > prev.lastDate) prev.lastDate = date;
+            }
+          }
+
+          return {
+            accountId: id,
+            lastDelivery: accountLast || null,
+            daysSince: accountLast ? daysBetween(accountLast, until) : null,
+            lookbackDays: lookback,
+            campaigns: [...byCampaign.values()]
+              .map((c) => ({
+                id: c.id,
+                name: c.name,
+                lastDelivery: c.lastDate,
+                daysSince: daysBetween(c.lastDate, until),
+                spend: c.spend,
+              }))
+              .sort((a, b) => b.daysSince - a.daysSince),
+          };
+        } catch (err) {
+          return { accountId: id, error: (err as Error).message, lastDelivery: null, daysSince: null, campaigns: [] };
+        }
+      }));
+
+      return json({ data: results });
     }
 
     // ── Métricas agregadas ──

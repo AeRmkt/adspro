@@ -143,6 +143,30 @@ export interface DailyInsight {
   conversations: number
 }
 
+/** Última entrega de uma campanha (detector de campanha parada). */
+export interface CampaignLastDelivery {
+  id: string
+  name: string
+  /** "YYYY-MM-DD" do último dia com impressão. */
+  lastDelivery: string
+  /** Dias desde a última entrega (0 = entregou hoje). */
+  daysSince: number
+  /** Gasto no período varrido. */
+  spend: number
+}
+
+/** Última veiculação de uma conta e de suas campanhas. */
+export interface AccountLastDelivery {
+  accountId: string
+  /** null = não entregou nada dentro da janela varrida. */
+  lastDelivery: string | null
+  daysSince: number | null
+  lookbackDays?: number
+  campaigns: CampaignLastDelivery[]
+  /** Preenchido quando a conta falhou (sem permissão, token inválido...). */
+  error?: string
+}
+
 export interface ComparePeriod {
   from: string
   to: string
