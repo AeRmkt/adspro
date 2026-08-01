@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, LayoutGrid } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
 import { DashboardFilters } from '../components/DashboardFilters'
 import { MetricPicker } from '../components/MetricPicker'
 import { MetricsGrid } from '../components/MetricsGrid'
@@ -12,7 +11,6 @@ import { BestAdsCard } from '../components/BestAdsCard'
 import { TrialBanner } from '../components/TrialBanner'
 import { ConnectMetaModal } from '../components/ConnectMetaModal'
 import { OrganizeSectionsModal } from '../components/OrganizeSectionsModal'
-import { AdAccountsList } from '../components/AdAccountsList'
 import { CampaignSelector } from '../components/CampaignSelector'
 import { Button } from '../components/ui/Button'
 import { useAdAccounts } from '../hooks/useAdAccounts'
@@ -21,7 +19,6 @@ import { useDashboardStore } from '../store/dashboardStore'
 import { sectionById } from '../lib/dashboardSections'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/auth'
-import { getMetaStatus } from '../services/api'
 import type { MetricInsights } from '@adspro/types'
 
 function aggregateCampaignMetrics(insights: MetricInsights[]): MetricInsights {
@@ -88,14 +85,6 @@ export default function Index() {
   const [showOrganize, setShowOrganize] = useState(false)
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null)
 
-  const { data: metaStatus } = useQuery({
-    queryKey: ['meta-status'],
-    queryFn: getMetaStatus,
-    enabled: !!user,
-    staleTime: 60_000,
-  })
-  const isMetaConnected = metaStatus?.connected && !metaStatus?.connection?.tokenInvalid
-
   // Agrega métricas das campanhas selecionadas
   const campaignData = useMemo<MetricInsights | null | undefined>(() => {
     if (selectedCampaignIds.length === 0) return undefined // usa métricas da conta
@@ -161,9 +150,6 @@ export default function Index() {
             </Button>
           </div>
         </div>
-
-        {/* Contas de Anúncio via OAuth */}
-        <AdAccountsList visible={!!isMetaConnected} />
 
         {/* Métricas */}
         {!accountsLoading && accounts?.length === 0 ? (

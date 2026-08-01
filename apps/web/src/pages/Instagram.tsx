@@ -61,9 +61,24 @@ export default function InstagramPage() {
   const syncMutation = useMutation({
     mutationFn: syncInstagramAccounts,
     onSuccess: (res) => {
-      toast({ title: `${res.synced} conta(s) sincronizada(s)`, variant: 'success' })
+      // O backend em produção ainda trata /api/instagram como stub e devolve [],
+      // sem os campos { synced, accounts }. Trata isso como "nada sincronizado"
+      // em vez de exibir "undefined" ou quebrar no .length.
+      const accounts = Array.isArray(res?.accounts) ? res.accounts : []
+      const synced = typeof res?.synced === 'number' ? res.synced : accounts.length
+
+      if (synced === 0) {
+        toast({
+          title: 'Nenhuma conta encontrada',
+          description:
+            'Verifique se há uma conta Instagram Business vinculada a uma Página do Facebook na conta Meta conectada.',
+        })
+      } else {
+        toast({ title: `${synced} conta(s) sincronizada(s)`, variant: 'success' })
+      }
+
       queryClient.invalidateQueries({ queryKey: ['instagram-accounts'] })
-      if (res.accounts.length > 0 && !selectedAccount) setSelectedAccount(res.accounts[0])
+      if (accounts.length > 0 && !selectedAccount) setSelectedAccount(accounts[0])
     },
     onError: (err) => toast({ title: 'Erro', description: (err as Error).message, variant: 'destructive' }),
   })

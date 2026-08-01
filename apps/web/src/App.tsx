@@ -16,7 +16,9 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 const MetaCallback = lazy(() => import('./pages/MetaCallback'))
 const Instagram = lazy(() => import('./pages/Instagram'))
 const BusinessManagers = lazy(() => import('./pages/BusinessManagers'))
+const Contas = lazy(() => import('./pages/Contas'))
 const Saldo = lazy(() => import('./pages/Saldo'))
+const DashboardBI = lazy(() => import('./pages/DashboardBI'))
 const AnaliseCopy = lazy(() => import('./pages/ia/AnaliseCopy'))
 const OtimizadorCriativos = lazy(() => import('./pages/ia/OtimizadorCriativos'))
 const PrevisaoGasto = lazy(() => import('./pages/ia/PrevisaoGasto'))
@@ -45,6 +47,7 @@ export default function App() {
           }
         >
           <Route index element={<Index />} />
+          <Route path="bi" element={<DashboardBI />} />
           <Route path="campanhas" element={<Campaigns />} />
           <Route path="conjuntos" element={<AdSets />} />
           <Route path="anuncios" element={<Ads />} />
@@ -52,6 +55,7 @@ export default function App() {
           <Route path="instagram" element={<Instagram />} />
           <Route path="saldo" element={<Saldo />} />
           <Route path="gerenciadores" element={<BusinessManagers />} />
+          <Route path="contas" element={<Contas />} />
           <Route path="ia/copy" element={<AnaliseCopy />} />
           <Route path="ia/criativos" element={<OtimizadorCriativos />} />
           <Route path="ia/previsao" element={<PrevisaoGasto />} />

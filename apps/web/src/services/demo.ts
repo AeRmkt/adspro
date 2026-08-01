@@ -16,8 +16,9 @@ const M = (o: Record<string, unknown> = {}) => ({
 })
 
 const account = {
-  id: 'acc_demo', metaAccountId: '1441341424027463', accountName: 'Grupo 7Otoni',
+  id: '1441341424027463', metaAccountId: '1441341424027463', accountName: 'Grupo 7Otoni',
   currency: 'BRL', timezone: 'America/Sao_Paulo', accountStatus: 1, isActive: true,
+  balance: 18.5, amountSpent: 312480, spendCap: null,
   source: 'oauth', connectedAt: nowIso, lastSyncAt: nowIso,
 }
 
@@ -37,6 +38,9 @@ const prev = M({
   ticketAverage: 616.14,
 })
 
+// frequência alta no período atual → dispara o alerta de fadiga de público
+total.frequency = 3.34
+
 const campaign = (id: string, name: string, objective: string, o: Record<string, unknown>) => ({
   id, name, status: 'ACTIVE', effectiveStatus: 'ACTIVE', objective,
   dailyBudget: null, lifetimeBudget: null, insights: M(o),
@@ -44,15 +48,18 @@ const campaign = (id: string, name: string, objective: string, o: Record<string,
 
 const campaigns = [
   campaign('c1', '[VENDAS] Black Friday · Advantage+', 'OUTCOME_SALES',
-    { spend: 98400, purchaseValue: 684200, purchases: 1012, roas: 6.95, impressions: 2480000, clicks: 64200, ctr: 2.59, cpc: 1.53, cpm: 39.68, costPerPurchase: 97.23, ticketAverage: 676.1, results: 1012, reach: 1720000, frequency: 1.44 }),
+    { spend: 98400, purchaseValue: 684200, purchases: 1012, roas: 6.95, impressions: 2480000, clicks: 64200, ctr: 2.59, cpc: 1.53, cpm: 39.68, costPerPurchase: 97.23, costPerResult: 97.23, ticketAverage: 676.1, results: 1012, reach: 1720000, frequency: 1.44 }),
   campaign('c2', '[VENDAS] Remarketing 30 dias', 'OUTCOME_SALES',
-    { spend: 52700, purchaseValue: 489300, purchases: 742, roas: 9.28, impressions: 1180000, clicks: 41300, ctr: 3.5, cpc: 1.28, cpm: 44.66, costPerPurchase: 71.02, ticketAverage: 659.43, results: 742, reach: 690000, frequency: 1.71 }),
+    { spend: 52700, purchaseValue: 489300, purchases: 742, roas: 9.28, impressions: 1180000, clicks: 41300, ctr: 3.5, cpc: 1.28, cpm: 44.66, costPerPurchase: 71.02, costPerResult: 71.02, ticketAverage: 659.43, results: 742, reach: 690000, frequency: 1.71 }),
   campaign('c3', '[VENDAS] Broad · Aquisição', 'OUTCOME_SALES',
-    { spend: 84300, purchaseValue: 386500, purchases: 560, roas: 4.58, impressions: 2620000, clicks: 52800, ctr: 2.02, cpc: 1.6, cpm: 32.17, costPerPurchase: 150.54, ticketAverage: 690.18, results: 560, reach: 1980000, frequency: 1.32 }),
+    { spend: 84300, purchaseValue: 386500, purchases: 560, roas: 4.58, impressions: 2620000, clicks: 52800, ctr: 2.02, cpc: 1.6, cpm: 32.17, costPerPurchase: 150.54, costPerResult: 150.54, ticketAverage: 690.18, results: 560, reach: 1980000, frequency: 1.32 }),
   campaign('c4', '[LEADS] Captação Topo de Funil', 'OUTCOME_LEADS',
-    { spend: 41800, purchaseValue: 182400, purchases: 318, roas: 4.36, impressions: 1340000, clicks: 28900, ctr: 2.16, cpc: 1.45, cpm: 31.19, costPerPurchase: 131.45, ticketAverage: 573.58, leads: 318, results: 318, reach: 980000, frequency: 1.37 }),
+    { spend: 41800, purchaseValue: 182400, purchases: 318, roas: 4.36, impressions: 1340000, clicks: 28900, ctr: 2.16, cpc: 1.45, cpm: 31.19, costPerPurchase: 131.45, costPerResult: 131.45, ticketAverage: 573.58, leads: 318, results: 318, reach: 980000, frequency: 1.37 }),
   campaign('c5', '[VENDAS] Lookalike Compradores 1%', 'OUTCOME_SALES',
-    { spend: 35280, purchaseValue: 100800, purchases: 222, roas: 2.86, impressions: 620000, clicks: 11300, ctr: 1.82, cpc: 3.12, cpm: 56.9, costPerPurchase: 158.92, ticketAverage: 454.05, results: 222, reach: 460000, frequency: 1.35 }),
+    { spend: 35280, purchaseValue: 100800, purchases: 222, roas: 2.86, impressions: 620000, clicks: 11300, ctr: 1.82, cpc: 3.12, cpm: 56.9, costPerPurchase: 158.92, costPerResult: 158.92, ticketAverage: 454.05, results: 222, reach: 460000, frequency: 1.35 }),
+  // Campanha "vazando verba": gastando sem nenhum resultado → alerta crítico
+  campaign('c6', '[TESTE] Público Frio · Criativo NOVO', 'OUTCOME_SALES',
+    { spend: 22850, purchaseValue: 0, purchases: 0, roas: 0, impressions: 540000, clicks: 6100, ctr: 1.13, cpc: 3.74, cpm: 42.31, costPerPurchase: null, ticketAverage: null, results: 0, reach: 430000, frequency: 1.26 }),
 ]
 
 // 30 dias de série temporal subindo

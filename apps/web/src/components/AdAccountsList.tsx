@@ -74,9 +74,11 @@ function AccountCard({ account }: { account: MetaAdAccount }) {
 
 interface AdAccountsListProps {
   visible: boolean
+  /** Quando a página já tem título próprio, só o botão Sincronizar é mantido. */
+  showHeading?: boolean
 }
 
-export function AdAccountsList({ visible }: AdAccountsListProps) {
+export function AdAccountsList({ visible, showHeading = true }: AdAccountsListProps) {
   const { data: accounts, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ['meta-ad-accounts'],
     queryFn: getMetaAdAccounts,
@@ -93,13 +95,15 @@ export function AdAccountsList({ visible }: AdAccountsListProps) {
   return (
     <div className="space-y-4">
       {/* Header da seção */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-semibold">Contas de Anúncio</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Contas disponíveis na sua conta Meta Business
-          </p>
-        </div>
+      <div className={showHeading ? 'flex items-center justify-between' : 'flex justify-end'}>
+        {showHeading && (
+          <div>
+            <h2 className="text-base font-semibold">Contas de Anúncio</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Contas disponíveis na sua conta Meta Business
+            </p>
+          </div>
+        )}
         <Button
           variant="outline"
           size="sm"

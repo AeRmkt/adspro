@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Megaphone, Layers, Image, FileText,
   Settings, ChevronDown, ChevronRight, MessageCircle, LogOut,
   ExternalLink, TrendingUp, Database, Palette, Clock, Link2,
-  Instagram, Building2, Sun, Moon, Wallet, X,
+  Instagram, Building2, Sun, Moon, Wallet, X, CreditCard,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useTheme } from '../lib/theme'
@@ -47,6 +47,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: 'Anúncios', href: '/anuncios', icon: <Image className="h-4 w-4" /> },
       { label: 'Relatórios', href: '/relatorios', icon: <FileText className="h-4 w-4" /> },
       { label: 'Saldo', href: '/saldo', icon: <Wallet className="h-4 w-4" /> },
+      { label: 'Contas de Anúncio', href: '/contas', icon: <CreditCard className="h-4 w-4" /> },
       { label: 'Gerenciadores', href: '/gerenciadores', icon: <Building2 className="h-4 w-4" /> },
       { label: 'Rastreamento de Leads', icon: <Link2 className="h-4 w-4" />, disabled: true },
     ],
